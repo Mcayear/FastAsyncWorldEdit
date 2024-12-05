@@ -590,10 +590,10 @@ public class CloudburstAdapter {
 //        if (set == null) {
 //            return newChunkSection(layer);
 //        }
-//        final int[] blockToPalette = FaweCache.IMP.blockToPalette.get();
-//        final int[] paletteToBlock = FaweCache.IMP.paletteToBlock.get();
-//        final long[] blockStates = FaweCache.IMP.blockStates.get();
-//        final int[] blocksCopy = FaweCache.IMP.sectionBlocks.get();
+//        final int[] blockToPalette = FaweCache.INSTANCE.blockToPalette.get();
+//        final int[] paletteToBlock = FaweCache.INSTANCE.paletteToBlock.get();
+//        final long[] blockStates = FaweCache.INSTANCE.blockStates.get();
+//        final int[] blocksCopy = FaweCache.INSTANCE.sectionBlocks.get();
 //        try {
 //            int[] num_palette_buffer = new int[1];
 //            Map<BlockVector3, Integer> ticking_blocks = new HashMap<>();
@@ -608,7 +608,7 @@ public class CloudburstAdapter {
 //            int num_palette = num_palette_buffer[0];
 //            // BlockStates
 //            int bitsPerEntry = MathMan.log2nlz(num_palette - 1);
-//            if (Settings.IMP.PROTOCOL_SUPPORT_FIX || num_palette != 1) {
+//            if (Settings.settings().PROTOCOL_SUPPORT_FIX || num_palette != 1) {
 //                bitsPerEntry = Math.max(bitsPerEntry, 4); // Protocol support breaks <4 bits per entry
 //            } else {
 //                bitsPerEntry = Math.max(bitsPerEntry, 1); // For some reason minecraft needs 4096 bits to store 0 entries
@@ -684,7 +684,7 @@ public class CloudburstAdapter {
 //            return;
 //        }
 //        if (playerChunk.hasBeenLoaded()) {
-//            TaskManager.IMP.sync(() -> {
+//            TaskManager.taskManager().sync(() -> {
 //                try {
 //                    int dirtyBits = fieldDirtyBits.getInt(playerChunk);
 //                    if (dirtyBits == 0) {

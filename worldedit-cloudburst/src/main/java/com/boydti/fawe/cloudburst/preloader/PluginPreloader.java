@@ -45,7 +45,7 @@ public class PluginPreloader extends PluginBase {
             Set<BlockVector2> toUnload = loaded;
             if (loaded != null && index > 0) {
                 Iterator<BlockVector2> iter = toUnload.iterator();
-                Fawe.get().getQueueHandler().sync(() -> {
+                Fawe.instance().getQueueHandler().sync(() -> {
                     for (int i = 0; i < index && iter.hasNext(); i++) {
                         BlockVector2 chunk = iter.next();
                         // FIXME: Not sure what this does but we need to add support
@@ -75,7 +75,7 @@ public class PluginPreloader extends PluginBase {
             if (!invalidator.get()) {
                 return;
             }
-            Fawe.get().getQueueHandler().syncWhenFree(() -> {
+            Fawe.instance().getQueueHandler().syncWhenFree(() -> {
                 for (; iter.hasNext() && invalidator.get(); index++) {
                     BlockVector2 chunk = iter.next();
                     if (!world.isChunkLoaded(chunk.getX(), chunk.getZ())) {

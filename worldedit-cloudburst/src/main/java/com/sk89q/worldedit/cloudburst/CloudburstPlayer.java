@@ -73,7 +73,7 @@ public class CloudburstPlayer extends AbstractPlayerActor {
     public CloudburstPlayer(WorldEditPlugin plugin, Player player) {
         this.plugin = plugin;
         this.player = player;
-        if (Settings.IMP.CLIPBOARD.USE_DISK) {
+        if (Settings.settings().CLIPBOARD.USE_DISK) {
             loadClipboardFromDisk();
         }
     }
@@ -128,7 +128,7 @@ public class CloudburstPlayer extends AbstractPlayerActor {
         player.getInventory().setItemInHand(newItem);
         Item[] overflow = inv.addItem(item);
         if (overflow.length != 0) {
-            TaskManager.IMP.sync(new RunnableVal<Object>() {
+            TaskManager.taskManager().sync(new RunnableVal<Object>() {
                 @Override
                 public void run(Object value) {
                     for (Item stack : overflow) {
@@ -183,7 +183,7 @@ public class CloudburstPlayer extends AbstractPlayerActor {
 
     @Override
     public boolean trySetPosition(Vector3 pos, float pitch, float yaw) {
-        return TaskManager.IMP.sync(() ->
+        return TaskManager.taskManager().sync(() ->
                 player.teleport(CloudburstAdapter.adapt(new Location(CloudburstAdapter.adapt(player.getLevel()), pos, pitch, yaw))));
     }
 
@@ -222,13 +222,13 @@ public class CloudburstPlayer extends AbstractPlayerActor {
          *  Permissions are used to managing WorldEdit region restrictions
          *   - The `/wea` command will give/remove the required bypass permission
          */
-//        if (Fawe.<FaweCloudburst>imp().getVault() == null || Fawe.<FaweCloudburst>imp().getVault().permission == null) {
+//        if (Fawe.<FaweCloudburst>platform().getVault() == null || Fawe.<FaweCloudburst>platform().getVault().permission == null) {
 //            player.addAttachment(plugin).setPermission(permission, value);
 //        } else if (value) {
-//            if (!Fawe.<FaweCloudburst>imp().getVault().permission.playerAdd(player, permission)) {
+//            if (!Fawe.<FaweCloudburst>platform().getVault().permission.playerAdd(player, permission)) {
 //                player.addAttachment(plugin).setPermission(permission, value);
 //            }
-//        } else if (!Fawe.<FaweCloudburst>imp().getVault().permission.playerRemove(player, permission)) {
+//        } else if (!Fawe.<FaweCloudburst>platform().getVault().permission.playerRemove(player, permission)) {
 //            player.addAttachment(plugin).setPermission(permission, value);
 //        }
     }

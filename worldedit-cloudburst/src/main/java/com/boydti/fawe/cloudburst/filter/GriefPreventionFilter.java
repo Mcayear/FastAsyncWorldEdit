@@ -19,7 +19,7 @@
 //
 //    public GriefPreventionFilter(World world) {
 //        checkNotNull(world);
-//        this.claims = TaskManager.IMP.sync(
+//        this.claims = TaskManager.taskManager().sync(
 //            (Supplier<Collection<Claim>>) () -> new ArrayDeque<>(GriefPrevention.instance.dataStore.getClaims()));
 //        this.world = world;
 //    }

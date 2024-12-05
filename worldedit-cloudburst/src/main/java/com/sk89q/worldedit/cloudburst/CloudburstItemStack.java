@@ -52,7 +52,7 @@ public class CloudburstItemStack extends BaseItemStack {
     public CompoundTag getNbtData() {
         if (!loadedNBT) {
             loadedNBT = true;
-            ItemUtil util = Fawe.<FaweCloudburst>imp().getItemUtil();
+            ItemUtil util = Fawe.<FaweCloudburst>platform().getItemUtil();
             if (util != null) {
                 super.setNbtData(util.getNBT(stack));
             }
@@ -62,7 +62,7 @@ public class CloudburstItemStack extends BaseItemStack {
 
     @Override
     public void setNbtData(@Nullable CompoundTag nbtData) {
-        ItemUtil util = Fawe.<FaweCloudburst>imp().getItemUtil();
+        ItemUtil util = Fawe.<FaweCloudburst>platform().getItemUtil();
         if (util != null) {
             stack = util.setNBT(stack, nbtData);
         }

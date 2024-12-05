@@ -46,7 +46,7 @@ public class FaweCloudburst implements IFawe, Listener {
     public FaweCloudburst(Plugin plugin) {
         this.plugin = plugin;
         try {
-            Settings.IMP.TICK_LIMITER.ENABLED = !plugin.getServer().hasWhitelist();
+            Settings.settings().TICK_LIMITER.ENABLED = !plugin.getServer().hasWhitelist();
             Fawe.set(this);
             Fawe.setupInjector();
             try {
@@ -65,7 +65,7 @@ public class FaweCloudburst implements IFawe, Listener {
         //PlotSquared support is limited to Spigot/Paper as of 02/20/2020
 
         // Registered delayed Event Listeners
-        TaskManager.IMP.task(() -> {
+        TaskManager.taskManager().task(() -> {
             // This class
             plugin.getServer().getPluginManager().registerEvents(this, this.plugin);
 
@@ -134,7 +134,7 @@ public class FaweCloudburst implements IFawe, Listener {
             try {
                 this.itemUtil = tmp = new ItemUtil();
             } catch (Throwable e) {
-                Settings.IMP.EXPERIMENTAL.PERSISTENT_BRUSHES = false;
+                Settings.settings().EXPERIMENTAL.PERSISTENT_BRUSHES = false;
                 log.debug("Persistent Brushes Failed", e);
             }
         }

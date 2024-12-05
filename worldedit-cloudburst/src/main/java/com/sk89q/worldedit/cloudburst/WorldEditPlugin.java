@@ -277,7 +277,7 @@ public class WorldEditPlugin extends PluginBase {
      */
     @Override
     public void onDisable() {
-        Fawe.get().onDisable();
+        Fawe.instance().onDisable();
         WorldEdit worldEdit = WorldEdit.getInstance();
         worldEdit.getSessionManager().unload();
         worldEdit.getPlatformManager().unregister(platform);

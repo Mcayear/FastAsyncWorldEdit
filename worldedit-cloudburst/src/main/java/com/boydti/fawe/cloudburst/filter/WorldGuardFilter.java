@@ -26,7 +26,7 @@
 //
 //    @Override
 //    public void calculateRegions() {
-//        Fawe.get().getQueueHandler().sync(() -> {
+//        Fawe.instance().getQueueHandler().sync(() -> {
 //            WorldGuardFilter.this.manager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(CloudburstAdapter.adapt(world));
 //            for (ProtectedRegion region : manager.getRegions().values()) {
 //                BlockVector3 min = region.getMinimumPoint();

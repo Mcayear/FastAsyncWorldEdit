@@ -1,7 +1,7 @@
 package com.boydti.fawe.cloudburst.listener;
 
 import com.boydti.fawe.cloudburst.util.image.CloudburstImageViewer;
-import com.fastasyncworldedit.core.command.tool.visualization.cfi.HeightMapMCAGenerator;
+//import com.fastasyncworldedit.core.command.tool.visualization.cfi.HeightMapMCAGenerator;
 import com.fastasyncworldedit.core.util.image.ImageViewer;
 import org.cloudburstmc.server.Server;
 import org.cloudburstmc.server.entity.Entity;
@@ -171,7 +171,7 @@ public class CloudburstImageListener implements Listener {
         //        if (frames == null || tool == null) {
         //            viewer.selectFrame(itemFrame);
         //            player.updateInventory();
-        //            TaskManager.IMP.laterAsync(() -> viewer.view(generator), 1);
+        //            TaskManager.taskManager().laterAsync(() -> viewer.view(generator), 1);
         //            return;
         //        }
         //

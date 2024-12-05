@@ -38,19 +38,19 @@ public abstract class ChunkListener implements Listener {
     private final Logger logger = getLogger(ChunkListener.class);
     protected int rateLimit = 0;
     protected Vector3i lastCancelPos;
-    private int[] badLimit = new int[]{Settings.IMP.TICK_LIMITER.PHYSICS_MS,
-            Settings.IMP.TICK_LIMITER.FALLING, Settings.IMP.TICK_LIMITER.ITEMS};
+    private int[] badLimit = new int[]{Settings.settings().TICK_LIMITER.PHYSICS_MS,
+            Settings.settings().TICK_LIMITER.FALLING, Settings.settings().TICK_LIMITER.ITEMS};
 
     public ChunkListener() {
-        if (Settings.IMP.TICK_LIMITER.ENABLED) {
+        if (Settings.settings().TICK_LIMITER.ENABLED) {
             PluginManager plm = Server.getInstance().getPluginManager();
-            Plugin plugin = Fawe.<FaweCloudburst>imp().getPlugin();
+            Plugin plugin = Fawe.<FaweCloudburst>platform().getPlugin();
             plm.registerEvents(this, plugin);
             try {
                 plm.registerEvents(new ChunkListener8Plus(this), plugin);
             } catch (Throwable ignored) {
             }
-            TaskManager.IMP.repeat(() -> {
+            TaskManager.taskManager().repeat(() -> {
                 Vector3i tmpLoc = lastCancelPos;
                 if (tmpLoc != null) {
                     logger.debug("[FAWE Tick Limiter] Detected and cancelled physics lag source at "
@@ -73,7 +73,7 @@ public abstract class ChunkListener implements Listener {
                     counter.put(key, badLimit);
                 }
                 badChunks.clear();
-            }, Settings.IMP.TICK_LIMITER.INTERVAL);
+            }, Settings.settings().TICK_LIMITER.INTERVAL);
         }
     }
 
@@ -229,13 +229,13 @@ public abstract class ChunkListener implements Listener {
             if ((++physSkip & 1023) != 0) {
                 return;
             }
-            FaweTimer timer = Fawe.get().getTimer();
+            FaweTimer timer = Fawe.instance().getTimer();
             if (timer.getTick() != physTick) {
                 physTick = timer.getTick();
                 physStart = System.currentTimeMillis();
                 return;
             } else if (System.currentTimeMillis() - physStart
-                    < Settings.IMP.TICK_LIMITER.PHYSICS_MS) {
+                    < Settings.settings().TICK_LIMITER.PHYSICS_MS) {
                 return;
             }
         }
@@ -312,15 +312,15 @@ public abstract class ChunkListener implements Listener {
         int cx = x >> 4;
         int cz = z >> 4;
         int[] count = getCount(cx, cz);
-        if (count[1] >= Settings.IMP.TICK_LIMITER.FALLING) {
+        if (count[1] >= Settings.settings().TICK_LIMITER.FALLING) {
             event.setCancelled(true);
             return;
         }
         if (event.getEntity().getType() == EntityTypes.FALLING_BLOCK) {
-            if (++count[1] >= Settings.IMP.TICK_LIMITER.FALLING) {
+            if (++count[1] >= Settings.settings().TICK_LIMITER.FALLING) {
 
                 // Only cancel falling blocks when it's lagging
-                if (Fawe.get().getTimer().getTPS() < 18) {
+                if (Fawe.instance().getTimer().getTPS() < 18) {
                     cancelNearby(cx, cz);
                     if (rateLimit <= 0) {
                         rateLimit = 20;
@@ -339,7 +339,7 @@ public abstract class ChunkListener implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChunkLoad(ChunkLoadEvent event) {
-        if (!Settings.IMP.TICK_LIMITER.FIREWORKS_LOAD_CHUNKS) {
+        if (!Settings.settings().TICK_LIMITER.FIREWORKS_LOAD_CHUNKS) {
             Chunk chunk = event.getChunk();
             Set<Entity> entities = chunk.getEntities();
             Level world = chunk.getLevel();
@@ -387,11 +387,11 @@ public abstract class ChunkListener implements Listener {
         int cx = vec.getFloorX() >> 4;
         int cz = vec.getFloorZ() >> 4;
         int[] count = getCount(cx, cz);
-        if (count[2] >= Settings.IMP.TICK_LIMITER.ITEMS) {
+        if (count[2] >= Settings.settings().TICK_LIMITER.ITEMS) {
             event.setCancelled(true);
             return;
         }
-        if (++count[2] >= Settings.IMP.TICK_LIMITER.ITEMS) {
+        if (++count[2] >= Settings.settings().TICK_LIMITER.ITEMS) {
             cleanup(entity.getLevel().getChunk(vec));
             cancelNearby(cx, cz);
             if (rateLimit <= 0) {

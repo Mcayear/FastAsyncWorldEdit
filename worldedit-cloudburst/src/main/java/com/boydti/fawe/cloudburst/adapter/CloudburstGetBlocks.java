@@ -213,7 +213,7 @@ public class CloudburstGetBlocks extends CharGetBlocks {
         try {
             Level level = world;
             Chunk chunk = this.ensureLoaded(chunkX, chunkZ);
-            boolean fastmode = set.isFastMode() && Settings.IMP.QUEUE.NO_TICK_FASTMODE;
+            boolean fastmode = set.isFastMode() && Settings.settings().QUEUE.NO_TICK_FASTMODE;
 
             // Remove existing tiles
             {
@@ -307,7 +307,7 @@ public class CloudburstGetBlocks extends CharGetBlocks {
                             if (biome != null) {
                                 final Biome cloudBiome = CloudburstAdapter.adapt(biome);
 
-                                for (int y = 0; y < FaweCache.IMP.WORLD_HEIGHT; y++) {
+                                for (int y = 0; y < FaweCache.INSTANCE.WORLD_HEIGHT; y++) {
                                     chunk.setBiome(x >> 2, z >> 2, BiomeRegistry.get().getRuntimeId(cloudBiome));
                                 }
                             }
@@ -465,7 +465,7 @@ public class CloudburstGetBlocks extends CharGetBlocks {
                     };
                 }
                 if (syncTasks != null) {
-                    QueueHandler queueHandler = Fawe.get().getQueueHandler();
+                    QueueHandler queueHandler = Fawe.instance().getQueueHandler();
                     Runnable[] finalSyncTasks = syncTasks;
 
                     // Chain the sync tasks and the callback
@@ -531,7 +531,7 @@ public class CloudburstGetBlocks extends CharGetBlocks {
             Arrays.fill(data, (char) 1);
             return data;
         }
-        if (data == null || data == FaweCache.IMP.EMPTY_CHAR_4096) {
+        if (data == null || data == FaweCache.INSTANCE.EMPTY_CHAR_4096) {
             data = new char[4096];
             Arrays.fill(data, (char) 1);
         }
@@ -548,7 +548,7 @@ public class CloudburstGetBlocks extends CharGetBlocks {
                 int bitsPerEntry = array.getVersion().getId();
                 int num_palette = palette.size();
 
-                char[] paletteToOrdinal = FaweCache.IMP.PALETTE_TO_BLOCK_CHAR.get();
+                char[] paletteToOrdinal = FaweCache.INSTANCE.PALETTE_TO_BLOCK_CHAR.get();
                 try {
                     if (num_palette != 1) {
                         for (int i = 0; i < num_palette; i++) {
