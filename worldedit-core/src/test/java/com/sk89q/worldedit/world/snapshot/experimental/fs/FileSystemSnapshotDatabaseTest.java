@@ -65,6 +65,7 @@ class FileSystemSnapshotDatabaseTest {
 
     static byte[] REGION_DATA;
     static byte[] CHUNK_DATA;
+    @SuppressWarnings("deprecation")
     static CompoundTag CHUNK_TAG;
     static BlockVector3 CHUNK_POS;
     static final String WORLD_ALPHA = "World Alpha";

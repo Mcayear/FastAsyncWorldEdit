@@ -22,6 +22,8 @@ package com.sk89q.worldedit.world.registry;
 import com.sk89q.worldedit.entity.BaseEntity;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Provides information on entities.

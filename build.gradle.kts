@@ -86,16 +86,16 @@ applyCommonConfiguration()
 val supportedVersions = listOf("1.20.4", "1.20.5", "1.20.6", "1.21", "1.21.1", "1.21.3")
 
 tasks {
-    supportedVersions.forEach {
-        register<RunServer>("runServer-$it") {
-            minecraftVersion(it)
-            pluginJars(*project(":worldedit-bukkit").getTasksByName("shadowJar", false).map { (it as Jar).archiveFile }
-                    .toTypedArray())
-            jvmArgs("-DPaper.IgnoreJavaVersion=true", "-Dcom.mojang.eula.agree=true", "--add-modules=jdk.incubator.vector")
-            group = "run paper"
-            runDirectory.set(file("run-$it"))
-        }
-    }
+//    supportedVersions.forEach {
+//        register<RunServer>("runServer-$it") {
+//            minecraftVersion(it)
+//            pluginJars(*project(":worldedit-bukkit").getTasksByName("shadowJar", false).map { (it as Jar).archiveFile }
+//                    .toTypedArray())
+//            jvmArgs("-DPaper.IgnoreJavaVersion=true", "-Dcom.mojang.eula.agree=true", "--add-modules=jdk.incubator.vector")
+//            group = "run paper"
+//            runDirectory.set(file("run-$it"))
+//        }
+//    }
     runServer {
         minecraftVersion("1.21.3")
         pluginJars(*project(":worldedit-bukkit").getTasksByName("shadowJar", false).map { (it as Jar).archiveFile }

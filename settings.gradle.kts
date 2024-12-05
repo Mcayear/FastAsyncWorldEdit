@@ -2,14 +2,20 @@ rootProject.name = "FastAsyncWorldEdit"
 
 include("worldedit-libs")
 
-listOf("1_20_2", "1_20_4", "1_20_5", "1_21", "1_21_3").forEach {
-    include("worldedit-bukkit:adapters:adapter-$it")
-}
+//listOf("1_20_2", "1_20_4", "1_20_5", "1_21", "1_21_3").forEach {
+//    include("worldedit-bukkit:adapters:adapter-$it")
+//}
+//
+//listOf("bukkit", "core", "cli").forEach {
+//    include("worldedit-libs:$it")
+//    include("worldedit-$it")
+//}
 
-listOf("bukkit", "core", "cli").forEach {
+listOf("cloudburst", "core").forEach {
     include("worldedit-libs:$it")
     include("worldedit-$it")
 }
+
 include("worldedit-libs:core:ap")
 
 dependencyResolutionManagement {
