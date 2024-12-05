@@ -22,8 +22,13 @@ public class CloudburstQueueHandler extends QueueHandler {
         }
     }
 
+    /**
+     * Indicate an unsafe task is starting. Physics are frozen, async catchers disabled, etc. for the duration of the task
+     *
+     * @param parallel If the task is being run async and/or in parallel
+     */
     @Override
-    public void startSet(boolean parallel) {
+    public void startUnsafe(final boolean parallel) {
         ChunkListener.physicsFreeze = true;
         if (parallel) {
             try {
@@ -42,8 +47,13 @@ public class CloudburstQueueHandler extends QueueHandler {
         }
     }
 
+    /**
+     * Indicate a/the unsafe task submitted after a {@link QueueHandler#startUnsafe(boolean)} call has ended.
+     *
+     * @param parallel If the task was being run async and/or in parallel
+     */
     @Override
-    public void endSet(boolean parallel) {
+    public void endUnsafe(final boolean parallel) {
         ChunkListener.physicsFreeze = false;
         if (parallel) {
             try {
@@ -56,4 +66,5 @@ public class CloudburstQueueHandler extends QueueHandler {
             }
         }
     }
+
 }

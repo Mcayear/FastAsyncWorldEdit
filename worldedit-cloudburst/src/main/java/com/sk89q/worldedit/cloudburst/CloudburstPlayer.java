@@ -19,9 +19,9 @@
 
 package com.sk89q.worldedit.cloudburst;
 
-import com.boydti.fawe.config.Settings;
-import com.boydti.fawe.object.RunnableVal;
-import com.boydti.fawe.util.TaskManager;
+import com.fastasyncworldedit.core.configuration.Settings;
+import com.fastasyncworldedit.core.util.task.RunnableVal;
+import com.fastasyncworldedit.core.util.TaskManager;
 import com.nukkitx.math.vector.Vector3i;
 import com.nukkitx.protocol.bedrock.packet.UpdateBlockPacket;
 import com.sk89q.worldedit.WorldEdit;

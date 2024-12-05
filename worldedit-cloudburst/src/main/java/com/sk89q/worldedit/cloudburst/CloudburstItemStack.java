@@ -1,6 +1,6 @@
 package com.sk89q.worldedit.cloudburst;
 
-import com.boydti.fawe.Fawe;
+import com.fastasyncworldedit.core.Fawe;
 import com.boydti.fawe.cloudburst.FaweCloudburst;
 import com.boydti.fawe.cloudburst.util.ItemUtil;
 import com.sk89q.jnbt.CompoundTag;

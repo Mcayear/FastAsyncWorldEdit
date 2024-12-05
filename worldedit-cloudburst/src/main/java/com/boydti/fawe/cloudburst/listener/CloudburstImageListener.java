@@ -1,8 +1,8 @@
 package com.boydti.fawe.cloudburst.listener;
 
 import com.boydti.fawe.cloudburst.util.image.CloudburstImageViewer;
-import com.boydti.fawe.object.brush.visualization.cfi.HeightMapMCAGenerator;
-import com.boydti.fawe.util.image.ImageViewer;
+import com.fastasyncworldedit.core.command.tool.visualization.cfi.HeightMapMCAGenerator;
+import com.fastasyncworldedit.core.util.image.ImageViewer;
 import org.cloudburstmc.server.Server;
 import org.cloudburstmc.server.entity.Entity;
 import org.cloudburstmc.server.event.Event;

@@ -19,9 +19,13 @@
 
 package com.sk89q.worldedit.cloudburst;
 
+import com.fastasyncworldedit.core.extent.inventory.SlottableBlockBag;
 import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BaseItemStack;
-import com.sk89q.worldedit.extent.inventory.*;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.extent.inventory.BlockBagException;
+import com.sk89q.worldedit.extent.inventory.OutOfBlocksException;
+import com.sk89q.worldedit.extent.inventory.OutOfSpaceException;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.block.BlockState;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;

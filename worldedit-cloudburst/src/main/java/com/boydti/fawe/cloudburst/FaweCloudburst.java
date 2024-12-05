@@ -1,5 +1,6 @@
 package com.boydti.fawe.cloudburst;
 
+import com.fastasyncworldedit.core.FAWEPlatformAdapterImpl;
 import com.fastasyncworldedit.core.Fawe;
 import com.fastasyncworldedit.core.IFawe;
 import com.fastasyncworldedit.core.queue.implementation.preloader.Preloader;
@@ -89,6 +90,17 @@ public class FaweCloudburst implements IFawe, Listener {
     @Override
     public QueueHandler getQueueHandler() {
         return new CloudburstQueueHandler();
+    }
+
+    /**
+     * Get the preloader instance and initialise if needed
+     *
+     * @param initialise if the preloader should be initialised if null
+     * @return preloader instance
+     */
+    @Override
+    public Preloader getPreloader(final boolean initialise) {
+        return null;
     }
 
     @Override
@@ -207,4 +219,10 @@ public class FaweCloudburst implements IFawe, Listener {
     public boolean isChunksStretched() {
         return chunksStretched;
     }
+
+    @Override
+    public FAWEPlatformAdapterImpl getPlatformAdapter() {
+        return null;
+    }
+
 }

@@ -1,11 +1,11 @@
 package com.boydti.fawe.cloudburst.listener;
 
-import com.boydti.fawe.Fawe;
+import com.fastasyncworldedit.core.Fawe;
 import com.boydti.fawe.cloudburst.FaweCloudburst;
-import com.boydti.fawe.config.Settings;
-import com.boydti.fawe.util.FaweTimer;
-import com.boydti.fawe.util.MathMan;
-import com.boydti.fawe.util.TaskManager;
+import com.fastasyncworldedit.core.configuration.Settings;
+import com.fastasyncworldedit.core.util.FaweTimer;
+import com.fastasyncworldedit.core.util.MathMan;
+import com.fastasyncworldedit.core.util.TaskManager;
 import com.nukkitx.math.vector.Vector3f;
 import com.nukkitx.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;

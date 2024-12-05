@@ -1,8 +1,8 @@
 package com.boydti.fawe.cloudburst.util.image;
 
-import com.boydti.fawe.util.image.Drawable;
-import com.boydti.fawe.util.image.ImageUtil;
-import com.boydti.fawe.util.image.ImageViewer;
+import com.fastasyncworldedit.core.util.image.Drawable;
+import com.fastasyncworldedit.core.util.image.ImageUtil;
+import com.fastasyncworldedit.core.util.image.ImageViewer;
 import com.nukkitx.math.vector.Vector3f;
 import com.nukkitx.math.vector.Vector3i;
 import org.cloudburstmc.server.block.BlockTraits;

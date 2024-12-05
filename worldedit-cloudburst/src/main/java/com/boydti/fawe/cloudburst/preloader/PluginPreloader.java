@@ -1,6 +1,6 @@
 package com.boydti.fawe.cloudburst.preloader;
 
-import com.boydti.fawe.Fawe;
+import com.fastasyncworldedit.core.Fawe;
 import com.sk89q.worldedit.cloudburst.CloudburstAdapter;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.regions.Region;

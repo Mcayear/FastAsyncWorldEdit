@@ -1,8 +1,8 @@
 package com.boydti.fawe.cloudburst.listener;
 
-import com.boydti.fawe.object.brush.MovableTool;
-import com.boydti.fawe.object.brush.ResettableTool;
-import com.boydti.fawe.object.brush.scroll.ScrollTool;
+import com.fastasyncworldedit.core.command.tool.MovableTool;
+import com.fastasyncworldedit.core.command.tool.ResettableTool;
+import com.fastasyncworldedit.core.command.tool.scroll.ScrollTool;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.cloudburst.CloudburstAdapter;
 import com.sk89q.worldedit.cloudburst.CloudburstPlayer;

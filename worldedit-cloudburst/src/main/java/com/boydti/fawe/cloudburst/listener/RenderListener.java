@@ -1,8 +1,8 @@
 package com.boydti.fawe.cloudburst.listener;
 
-import com.boydti.fawe.Fawe;
-import com.boydti.fawe.config.Settings;
-import com.boydti.fawe.util.TaskManager;
+import com.fastasyncworldedit.core.Fawe;
+import com.fastasyncworldedit.core.configuration.Settings;
+import com.fastasyncworldedit.core.util.TaskManager;
 import org.cloudburstmc.server.Server;
 import org.cloudburstmc.server.event.EventHandler;
 import org.cloudburstmc.server.event.EventPriority;

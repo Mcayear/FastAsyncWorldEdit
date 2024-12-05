@@ -1,6 +1,6 @@
 package com.boydti.fawe.cloudburst.util;
 
-import com.boydti.fawe.util.TaskManager;
+import com.fastasyncworldedit.core.util.TaskManager;
 import org.cloudburstmc.server.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 

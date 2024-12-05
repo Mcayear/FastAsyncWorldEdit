@@ -1,7 +1,7 @@
 //package com.boydti.fawe.bukkit.listener;
 //
 //import com.boydti.fawe.FaweCache;
-//import com.boydti.fawe.object.brush.visualization.VirtualWorld;
+//import com.fastasyncworldedit.core.command.tool.visualization.VirtualWorld;
 //import com.nukkitx.math.vector.Vector3i;
 //import com.sk89q.worldedit.WorldEdit;
 //import com.sk89q.worldedit.WorldEditException;

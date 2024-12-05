@@ -20,7 +20,7 @@
 package com.sk89q.worldedit.cloudburst;
 
 
-import com.boydti.fawe.Fawe;
+import com.fastasyncworldedit.core.Fawe;
 import com.boydti.fawe.cloudburst.FaweCloudburst;
 import com.google.common.base.Joiner;
 import com.sk89q.util.yaml.YAMLProcessor;
