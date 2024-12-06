@@ -26,6 +26,10 @@ repositories {
         name = "JitPack"
         url = uri("https://jitpack.io")
     }
+    maven {
+        name = "ltname"
+        url = uri("https://repo.lanink.cn/repository/maven-public/")
+    }
     mavenLocal()
     // 如果需要，可以添加更多仓库
 }

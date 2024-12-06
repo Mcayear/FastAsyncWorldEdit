@@ -10,7 +10,7 @@ snakeyaml = "2.0"
 ## cloudburst version
 annotations = "19.0.0"
 voxelsniper = "5.171.0"
-cloudburstmc = "1.0.0-SNAPSHOT"
+cloudburstmc = "MOT-SNAPSHOT"
 
 # Plugins
 dummypermscompat = "1.10"
@@ -71,7 +71,7 @@ snakeyaml = { group = "org.yaml", name = "snakeyaml", version.ref = "snakeyaml" 
 ## cloudburst libraries
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
 voxelsniper = { group = "com.thevoxelbox.voxelsniper", name = "voxelsniper", version.ref = "voxelsniper" }
-cloudburstmc = { group = "org.cloudburstmc", name = "cloudburst-server", version.ref = "cloudburstmc" }
+cloudburstmc = { group = "cn.nukkit", name = "Nukkit", version.ref = "cloudburstmc" }
 
 # Plugins
 dummypermscompat = { group = "com.sk89q", name = "dummypermscompat", version.ref = "dummypermscompat" }
