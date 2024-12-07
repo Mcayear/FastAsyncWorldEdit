@@ -30,9 +30,9 @@ import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.block.BlockState;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import org.cloudburstmc.server.block.BlockTypes;
-import org.cloudburstmc.server.item.Item;
-import org.cloudburstmc.server.player.Player;
+import cn.nukkit.block.BlockTypes;
+import cn.nukkit.item.Item;
+import cn.nukkit.Player;
 
 public class CloudburstPlayerBlockBag extends BlockBag implements SlottableBlockBag {
 

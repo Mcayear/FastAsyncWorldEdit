@@ -2,7 +2,7 @@ package com.sk89q.worldedit.cloudburst;
 
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.world.registry.EntityRegistry;
-import org.cloudburstmc.server.entity.EntityType;
+import cn.nukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

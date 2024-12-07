@@ -19,10 +19,13 @@
 
 package com.sk89q.worldedit.cloudburst;
 
+import com.sk89q.worldedit.util.formatting.text.Component;
+import com.sk89q.worldedit.util.formatting.text.TranslatableComponent;
+import com.sk89q.worldedit.util.translation.TranslationManager;
 import com.sk89q.worldedit.world.biome.BiomeData;
 import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.registry.BiomeRegistry;
-import org.cloudburstmc.server.level.biome.Biome;
+import cn.nukkit.level.biome.Biome;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -32,6 +35,19 @@ import org.jetbrains.annotations.Nullable;
 class CloudburstBiomeRegistry implements BiomeRegistry {
 
     CloudburstBiomeRegistry() {
+    }
+
+    /**
+     * Get the name of the biome, usually as a translatable component.
+     *
+     * @param biomeType the biome type
+     * @return the name of the biome
+     */
+    @Override
+    public Component getRichName(final BiomeType biomeType) {
+        return TranslatableComponent.of(
+                TranslationManager.makeTranslationKey("biome", biomeType.id())
+        );
     }
 
     @Deprecated

@@ -19,11 +19,11 @@
 
 package com.sk89q.cloudburst.util;
 
-import org.cloudburstmc.server.command.Command;
-import org.cloudburstmc.server.command.CommandExecutor;
-import org.cloudburstmc.server.command.PluginIdentifiableCommand;
-import org.cloudburstmc.server.plugin.Plugin;
-import org.cloudburstmc.server.registry.CommandRegistry;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandExecutor;
+import cn.nukkit.command.PluginIdentifiableCommand;
+import cn.nukkit.plugin.Plugin;
+import cn.nukkit.registry.CommandRegistry;
 
 import java.util.List;
 import java.util.Map.Entry;

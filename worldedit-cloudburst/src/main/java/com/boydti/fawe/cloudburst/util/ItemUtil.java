@@ -1,9 +1,9 @@
 package com.boydti.fawe.cloudburst.util;
 
-import com.nukkitx.nbt.NbtMap;
+import org.cloudburstmc.nbt.NbtMap;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.cloudburst.CloudburstAdapter;
-import org.cloudburstmc.server.item.Item;
+import cn.nukkit.item.Item;
 
 public class ItemUtil {
 

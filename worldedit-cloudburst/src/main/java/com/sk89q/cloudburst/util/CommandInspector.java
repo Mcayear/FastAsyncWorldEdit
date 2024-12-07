@@ -19,8 +19,8 @@
 
 package com.sk89q.cloudburst.util;
 
-import org.cloudburstmc.server.command.Command;
-import org.cloudburstmc.server.command.CommandSender;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
 
 public interface CommandInspector {
 

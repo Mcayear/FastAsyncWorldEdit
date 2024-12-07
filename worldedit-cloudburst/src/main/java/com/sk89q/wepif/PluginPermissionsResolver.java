@@ -20,10 +20,10 @@
 package com.sk89q.wepif;
 
 import com.sk89q.util.yaml.YAMLProcessor;
-import org.cloudburstmc.server.Server;
-import org.cloudburstmc.server.player.IPlayer;
-import org.cloudburstmc.server.plugin.Plugin;
-import org.cloudburstmc.server.plugin.service.RegisteredServiceProvider;
+import cn.nukkit.Server;
+import cn.nukkit.IPlayer;
+import cn.nukkit.plugin.Plugin;
+import cn.nukkit.plugin.service.RegisteredServiceProvider;
 
 public class PluginPermissionsResolver implements PermissionsResolver {
 

@@ -21,7 +21,7 @@ package com.sk89q.wepif;
 
 import com.sk89q.util.yaml.YAMLNode;
 import com.sk89q.util.yaml.YAMLProcessor;
-import org.cloudburstmc.server.player.IPlayer;
+import cn.nukkit.IPlayer;
 
 import java.util.*;
 

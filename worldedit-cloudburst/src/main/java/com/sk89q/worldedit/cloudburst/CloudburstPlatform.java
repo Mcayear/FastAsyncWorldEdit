@@ -31,11 +31,11 @@ import com.sk89q.worldedit.util.SideEffect;
 import com.sk89q.worldedit.util.concurrency.LazyReference;
 import com.sk89q.worldedit.world.DataFixer;
 import com.sk89q.worldedit.world.registry.Registries;
-import org.cloudburstmc.server.Server;
-import org.cloudburstmc.server.entity.EntityType;
-import org.cloudburstmc.server.level.Level;
-import org.cloudburstmc.server.registry.EntityRegistry;
-import org.cloudburstmc.server.utils.Identifier;
+import cn.nukkit.Server;
+import cn.nukkit.entity.EntityType;
+import cn.nukkit.level.Level;
+import cn.nukkit.registry.EntityRegistry;
+import cn.nukkit.utils.Identifier;
 import org.enginehub.piston.CommandManager;
 import org.jetbrains.annotations.Nullable;
 

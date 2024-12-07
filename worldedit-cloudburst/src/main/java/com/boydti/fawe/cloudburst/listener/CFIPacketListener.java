@@ -2,7 +2,7 @@
 //
 //import com.boydti.fawe.FaweCache;
 //import com.fastasyncworldedit.core.command.tool.visualization.VirtualWorld;
-//import com.nukkitx.math.vector.Vector3i;
+//import cn.nukkit.math.vector.Vector3i;
 //import com.sk89q.worldedit.WorldEdit;
 //import com.sk89q.worldedit.WorldEditException;
 //import com.sk89q.worldedit.cloudburst.CloudburstAdapter;
@@ -13,15 +13,15 @@
 //import com.sk89q.worldedit.math.BlockVector3;
 //import com.sk89q.worldedit.world.block.BlockState;
 //import com.sk89q.worldedit.world.block.BlockTypes;
-//import org.cloudburstmc.server.block.Block;
-//import org.cloudburstmc.server.block.BlockStates;
-//import org.cloudburstmc.server.block.CloudBlock;
-//import org.cloudburstmc.server.event.EventHandler;
-//import org.cloudburstmc.server.event.Listener;
-//import org.cloudburstmc.server.event.player.PlayerTeleportEvent;
-//import org.cloudburstmc.server.level.Location;
-//import org.cloudburstmc.server.player.Player;
-//import org.cloudburstmc.server.plugin.Plugin;
+//import cn.nukkit.block.Block;
+//import cn.nukkit.block.BlockStates;
+//import cn.nukkit.block.CloudBlock;
+//import cn.nukkit.event.EventHandler;
+//import cn.nukkit.event.Listener;
+//import cn.nukkit.event.player.PlayerTeleportEvent;
+//import cn.nukkit.level.Location;
+//import cn.nukkit.Player;
+//import cn.nukkit.plugin.Plugin;
 //
 //import java.lang.reflect.InvocationTargetException;
 //import java.util.List;

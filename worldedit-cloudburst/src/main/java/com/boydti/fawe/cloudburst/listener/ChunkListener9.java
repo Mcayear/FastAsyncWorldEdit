@@ -4,10 +4,10 @@ import com.fastasyncworldedit.core.Fawe;
 import com.fastasyncworldedit.core.configuration.Settings;
 import com.fastasyncworldedit.core.util.FaweTimer;
 import com.fastasyncworldedit.core.util.MathMan;
-import org.cloudburstmc.server.block.Block;
-import org.cloudburstmc.server.event.EventHandler;
-import org.cloudburstmc.server.event.EventPriority;
-import org.cloudburstmc.server.event.block.BlockUpdateEvent;
+import cn.nukkit.block.Block;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.block.BlockUpdateEvent;
 
 public class ChunkListener9 extends ChunkListener {
 

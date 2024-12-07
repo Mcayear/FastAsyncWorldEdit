@@ -1,8 +1,8 @@
 package com.sk89q.worldedit.cloudburst;
 
 import com.sk89q.worldedit.world.registry.BundledItemRegistry;
-import org.cloudburstmc.server.registry.ItemRegistry;
-import org.cloudburstmc.server.utils.Identifier;
+import cn.nukkit.registry.ItemRegistry;
+import cn.nukkit.utils.Identifier;
 
 import java.util.Collection;
 import java.util.HashSet;

@@ -6,7 +6,7 @@ import com.boydti.fawe.cloudburst.util.ItemUtil;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.world.item.ItemType;
-import org.cloudburstmc.server.item.Item;
+import cn.nukkit.item.Item;
 import org.jetbrains.annotations.Nullable;
 
 public class CloudburstItemStack extends BaseItemStack {

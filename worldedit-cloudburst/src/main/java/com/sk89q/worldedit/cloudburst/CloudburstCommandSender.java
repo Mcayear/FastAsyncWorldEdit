@@ -25,9 +25,9 @@ import com.sk89q.worldedit.session.SessionKey;
 import com.sk89q.worldedit.util.auth.AuthorizationException;
 import com.sk89q.worldedit.util.formatting.WorldEditText;
 import com.sk89q.worldedit.util.formatting.text.Component;
-import org.cloudburstmc.server.command.CommandSender;
-import org.cloudburstmc.server.entity.Entity;
-import org.cloudburstmc.server.player.Player;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;

@@ -20,22 +20,22 @@
 package com.sk89q.worldedit.cloudburst;
 
 import com.sk89q.worldedit.entity.metadata.EntityProperties;
-import org.cloudburstmc.server.blockentity.ItemFrame;
-import org.cloudburstmc.server.entity.Entity;
-import org.cloudburstmc.server.entity.Projectile;
-import org.cloudburstmc.server.entity.impl.EntityLiving;
-import org.cloudburstmc.server.entity.impl.Human;
-import org.cloudburstmc.server.entity.impl.passive.Animal;
-import org.cloudburstmc.server.entity.impl.passive.EntityTameable;
-import org.cloudburstmc.server.entity.impl.vehicle.EntityMinecart;
-import org.cloudburstmc.server.entity.misc.*;
-import org.cloudburstmc.server.entity.passive.Bat;
-import org.cloudburstmc.server.entity.passive.IronGolem;
-import org.cloudburstmc.server.entity.passive.Villager;
-import org.cloudburstmc.server.entity.vehicle.Boat;
-import org.cloudburstmc.server.entity.vehicle.Minecart;
-import org.cloudburstmc.server.player.Player;
-import org.cloudburstmc.server.utils.data.MinecartType;
+import cn.nukkit.blockentity.ItemFrame;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.Projectile;
+import cn.nukkit.entity.impl.EntityLiving;
+import cn.nukkit.entity.impl.Human;
+import cn.nukkit.entity.impl.passive.Animal;
+import cn.nukkit.entity.impl.passive.EntityTameable;
+import cn.nukkit.entity.impl.vehicle.EntityMinecart;
+import cn.nukkit.entity.misc.*;
+import cn.nukkit.entity.passive.Bat;
+import cn.nukkit.entity.passive.IronGolem;
+import cn.nukkit.entity.passive.Villager;
+import cn.nukkit.entity.vehicle.Boat;
+import cn.nukkit.entity.vehicle.Minecart;
+import cn.nukkit.Player;
+import cn.nukkit.utils.data.MinecartType;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

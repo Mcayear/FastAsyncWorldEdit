@@ -1,19 +1,19 @@
 package com.boydti.fawe.cloudburst.listener;
 
-import com.boydti.fawe.cloudburst.util.image.CloudburstImageViewer;
+//import com.boydti.fawe.cloudburst.util.image.CloudburstImageViewer;
 //import com.fastasyncworldedit.core.command.tool.visualization.cfi.HeightMapMCAGenerator;
-import com.fastasyncworldedit.core.util.image.ImageViewer;
-import org.cloudburstmc.server.Server;
-import org.cloudburstmc.server.entity.Entity;
-import org.cloudburstmc.server.event.Event;
-import org.cloudburstmc.server.event.EventHandler;
-import org.cloudburstmc.server.event.EventPriority;
-import org.cloudburstmc.server.event.Listener;
-import org.cloudburstmc.server.event.entity.EntityDamageByEntityEvent;
-import org.cloudburstmc.server.event.player.PlayerEvent;
-import org.cloudburstmc.server.event.player.PlayerInteractEntityEvent;
-import org.cloudburstmc.server.player.Player;
-import org.cloudburstmc.server.plugin.Plugin;
+//import com.fastasyncworldedit.core.util.image.ImageViewer;
+import cn.nukkit.Server;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.event.Event;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.player.PlayerEvent;
+import cn.nukkit.event.player.PlayerInteractEntityEvent;
+import cn.nukkit.Player;
+import cn.nukkit.plugin.Plugin;
 
 public class CloudburstImageListener implements Listener {
 
@@ -123,18 +123,18 @@ public class CloudburstImageListener implements Listener {
         handleInteract(event, event.getEntity(), true);
     }
 
-    private CloudburstImageViewer get(HeightMapMCAGenerator generator) {
-        if (generator == null) {
-            return null;
-        }
-
-        ImageViewer viewer = generator.getImageViewer();
-        if (!(viewer instanceof CloudburstImageViewer)) {
-            return null;
-        }
-
-        return (CloudburstImageViewer) viewer;
-    }
+//    private CloudburstImageViewer get(HeightMapMCAGenerator generator) {
+//        if (generator == null) {
+//            return null;
+//        }
+//
+//        ImageViewer viewer = generator.getImageViewer();
+//        if (!(viewer instanceof CloudburstImageViewer)) {
+//            return null;
+//        }
+//
+//        return (CloudburstImageViewer) viewer;
+//    }
 
     private void handleInteract(PlayerEvent event, Entity entity, boolean primary) {
         handleInteract(event, event.getPlayer(), entity, primary);

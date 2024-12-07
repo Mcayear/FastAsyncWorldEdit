@@ -26,9 +26,9 @@ import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.registry.BlockMaterial;
 import com.sk89q.worldedit.world.registry.BundledBlockRegistry;
 import com.sk89q.worldedit.world.registry.PassthroughBlockMaterial;
-import org.cloudburstmc.server.block.BlockStates;
-import org.cloudburstmc.server.registry.BlockRegistry;
-import org.cloudburstmc.server.utils.Identifier;
+import cn.nukkit.block.BlockStates;
+import cn.nukkit.registry.BlockRegistry;
+import cn.nukkit.utils.Identifier;
 
 import java.util.*;
 

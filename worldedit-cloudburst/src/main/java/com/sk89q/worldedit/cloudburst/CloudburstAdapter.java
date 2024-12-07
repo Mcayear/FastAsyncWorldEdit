@@ -19,15 +19,17 @@
 
 package com.sk89q.worldedit.cloudburst;
 
+import com.fastasyncworldedit.core.nbt.FaweCompoundTag;
 import com.fastasyncworldedit.core.queue.IChunkGet;
 import com.fastasyncworldedit.core.queue.implementation.packet.ChunkPacket;
 import com.boydti.fawe.cloudburst.adapter.CloudburstGetBlocks;
+import com.fastasyncworldedit.core.util.ReflectionUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableBiMap;
-import com.nukkitx.nbt.NbtList;
-import com.nukkitx.nbt.NbtMap;
-import com.nukkitx.nbt.NbtMapBuilder;
-import com.nukkitx.nbt.NbtType;
+import org.cloudburstmc.nbt.NbtList;
+import org.cloudburstmc.nbt.NbtMap;
+import org.cloudburstmc.nbt.NbtMapBuilder;
+import org.cloudburstmc.nbt.NbtType;
 import com.sk89q.jnbt.*;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseItemStack;
@@ -49,18 +51,18 @@ import com.sk89q.worldedit.world.gamemode.GameMode;
 import com.sk89q.worldedit.world.item.ItemType;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.jpountz.util.UnsafeUtils;
-import org.cloudburstmc.server.Server;
-import org.cloudburstmc.server.block.BlockPalette;
-import org.cloudburstmc.server.command.CommandSender;
-import org.cloudburstmc.server.item.Item;
-import org.cloudburstmc.server.level.Level;
-import org.cloudburstmc.server.level.biome.Biome;
-import org.cloudburstmc.server.level.chunk.ChunkSection;
-import org.cloudburstmc.server.player.Player;
-import org.cloudburstmc.server.registry.BiomeRegistry;
-import org.cloudburstmc.server.registry.EntityRegistry;
-import org.cloudburstmc.server.utils.Identifier;
+import cn.nukkit.Server;
+import cn.nukkit.block.BlockPalette;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.item.Item;
+import cn.nukkit.level.Level;
+import cn.nukkit.level.biome.Biome;
+import cn.nukkit.level.chunk.ChunkSection;
+import cn.nukkit.Player;
+import cn.nukkit.registry.BiomeRegistry;
+import cn.nukkit.registry.EntityRegistry;
+import cn.nukkit.utils.Identifier;
+import org.enginehub.linbus.tree.LinTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sun.misc.Unsafe;
@@ -86,7 +88,7 @@ public class CloudburstAdapter {
     static {
         TO_BLOCK_CONTEXT.setRestricted(false);
 
-        Unsafe unsafe = UnsafeUtils.getUNSAFE();
+        Unsafe unsafe = ReflectionUtils.getUnsafe();
         CHUNKSECTION_BASE = unsafe.arrayBaseOffset(ChunkSection[].class);
         int scale = unsafe.arrayIndexScale(ChunkSection[].class);
         if ((scale & (scale - 1)) != 0) {
@@ -103,7 +105,7 @@ public class CloudburstAdapter {
      * @return If they are equal
      */
     public static boolean equals(BlockType blockType, Identifier type) {
-        return Identifier.fromString(blockType.getId()) == type;
+        return Identifier.fromString(blockType.id()) == type;
     }
 
     /**
@@ -485,11 +487,11 @@ public class CloudburstAdapter {
      * @return The Bukkit ItemStack
      */
     public static Item adapt(BaseItemStack itemStack) {
-        return Item.get(Identifier.fromString(itemStack.getType().getId()), 0, itemStack.getAmount(),
+        return Item.get(Identifier.fromString(itemStack.getType().id()), 0, itemStack.getAmount(),
                 CloudburstAdapter.adapt(itemStack.getNbtData()));
     }
 
-    public static CompoundTag adapt(NbtMap nbtMap) {
+    public static FaweCompoundTag adapt(NbtMap nbtMap) {
         return adaptTag(nbtMap);
     }
 
@@ -521,7 +523,7 @@ public class CloudburstAdapter {
     public static <T extends Tag> T adaptTag(Object tag) {
         if (tag instanceof NbtMap) {
             NbtMap nbtMap = (NbtMap) tag;
-            Map<String, Tag> tags = new LinkedHashMap<>();
+            Map<String, Tag<?, ?>> tags = new LinkedHashMap<>();
             nbtMap.forEach((key, value) -> tags.put(key, adaptTag(value)));
             return (T) new CompoundTag(tags);
         } else if (tag instanceof NbtList) {
@@ -565,7 +567,7 @@ public class CloudburstAdapter {
         } else if (tag instanceof ListTag) {
             ListTag listTag = (ListTag) tag;
             List<Object> list = new ArrayList<>(listTag.getValue().size());
-            for (Tag value : listTag.getValue()) {
+            for (Object value : listTag.getValue()) {
                 list.add(adaptTag(value));
             }
             NbtType<?> type = TAG_CLASSES.inverse().get(listTag.getType());
@@ -673,7 +675,7 @@ public class CloudburstAdapter {
     public static boolean setSectionAtomic(ChunkSection[] sections, ChunkSection expected, ChunkSection value, int layer) {
         long offset = ((long) layer << CHUNKSECTION_SHIFT) + CHUNKSECTION_BASE;
         if (layer >= 0 && layer < sections.length) {
-            return UnsafeUtils.getUNSAFE().compareAndSwapObject(sections, offset, expected, value);
+            return ReflectionUtils.getUnsafe().compareAndSwapObject(sections, offset, expected, value);
         }
         return false;
     }

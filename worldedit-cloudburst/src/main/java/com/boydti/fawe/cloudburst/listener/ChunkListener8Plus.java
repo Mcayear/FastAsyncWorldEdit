@@ -1,10 +1,10 @@
 package com.boydti.fawe.cloudburst.listener;
 
 
-import org.cloudburstmc.server.event.EventHandler;
-import org.cloudburstmc.server.event.EventPriority;
-import org.cloudburstmc.server.event.Listener;
-import org.cloudburstmc.server.event.entity.EntityExplodeEvent;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.entity.EntityExplodeEvent;
 
 public class ChunkListener8Plus implements Listener {
 

@@ -21,13 +21,13 @@ package com.sk89q.cloudburst.util;
 
 import com.sk89q.minecraft.util.commands.CommandsManager;
 import com.sk89q.wepif.PermissionsResolverManager;
-import org.cloudburstmc.server.command.Command;
-import org.cloudburstmc.server.command.CommandExecutor;
-import org.cloudburstmc.server.command.CommandSender;
-import org.cloudburstmc.server.command.PluginCommand;
-import org.cloudburstmc.server.command.data.CommandData;
-import org.cloudburstmc.server.player.OfflinePlayer;
-import org.cloudburstmc.server.plugin.Plugin;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandExecutor;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.PluginCommand;
+import cn.nukkit.command.data.CommandData;
+import cn.nukkit.OfflinePlayer;
+import cn.nukkit.plugin.Plugin;
 
 import java.util.Arrays;
 import java.util.List;

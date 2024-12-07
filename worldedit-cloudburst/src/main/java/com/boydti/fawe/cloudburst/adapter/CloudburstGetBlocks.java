@@ -2,6 +2,8 @@ package com.boydti.fawe.cloudburst.adapter;
 
 import com.fastasyncworldedit.core.Fawe;
 import com.fastasyncworldedit.core.FaweCache;
+import com.fastasyncworldedit.core.extent.processor.heightmap.HeightMapType;
+import com.fastasyncworldedit.core.nbt.FaweCompoundTag;
 import com.fastasyncworldedit.core.queue.IChunkSet;
 import com.fastasyncworldedit.core.queue.implementation.blocks.CharBlocks;
 import com.fastasyncworldedit.core.queue.implementation.blocks.CharGetBlocks;
@@ -10,31 +12,32 @@ import com.fastasyncworldedit.core.configuration.Settings;
 import com.fastasyncworldedit.core.util.collection.AdaptedMap;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
-import com.nukkitx.math.vector.Vector3i;
-import com.nukkitx.nbt.NbtMap;
-import com.nukkitx.nbt.NbtMapBuilder;
+import cn.nukkit.math.Vector3;
+import org.cloudburstmc.nbt.NbtMap;
+import org.cloudburstmc.nbt.NbtMapBuilder;
 import com.sk89q.jnbt.*;
 import com.sk89q.worldedit.cloudburst.CloudburstAdapter;
 import com.sk89q.worldedit.internal.Constants;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.biome.BiomeType;
-import org.cloudburstmc.server.block.BlockState;
-import org.cloudburstmc.server.blockentity.BlockEntity;
-import org.cloudburstmc.server.entity.Entity;
-import org.cloudburstmc.server.entity.EntityType;
-import org.cloudburstmc.server.level.Level;
-import org.cloudburstmc.server.level.Location;
-import org.cloudburstmc.server.level.biome.Biome;
-import org.cloudburstmc.server.level.chunk.BlockStorage;
-import org.cloudburstmc.server.level.chunk.Chunk;
-import org.cloudburstmc.server.level.chunk.ChunkSection;
-import org.cloudburstmc.server.level.chunk.bitarray.BitArray;
-import org.cloudburstmc.server.registry.BiomeRegistry;
-import org.cloudburstmc.server.registry.BlockRegistry;
-import org.cloudburstmc.server.registry.EntityRegistry;
-import org.cloudburstmc.server.utils.Identifier;
-import org.cloudburstmc.server.utils.NibbleArray;
+import cn.nukkit.level.generator.block.state.BlockState;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.EntityType;
+import cn.nukkit.level.Level;
+import cn.nukkit.level.Location;
+import cn.nukkit.level.biome.Biome;
+import cn.nukkit.level.format.anvil.util.BlockStorage;
+import cn.nukkit.level.format.anvil.Chunk;
+import cn.nukkit.level.format.anvil.ChunkSection;
+import cn.nukkit.level.util.BitArray;
+import cn.nukkit.level.biome.EnumBiome;
+import cn.nukkit.registry.BlockRegistry;
+import cn.nukkit.registry.EntityRegistry;
+import cn.nukkit.utils.Identifier;
+import cn.nukkit.utils.NibbleArray;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +53,7 @@ public class CloudburstGetBlocks extends CharGetBlocks {
 
     private static final Logger log = LoggerFactory.getLogger(CloudburstGetBlocks.class);
 
-    private static final Function<Vector3i, BlockVector3> posNms2We = v -> BlockVector3.at(v.getX(), v.getY(), v.getZ());
+    private static final Function<Vector3, BlockVector3> posNms2We = v -> BlockVector3.at(v.getX(), v.getY(), v.getZ());
     private static final Function<BlockEntity, CompoundTag> nmsTile2We = tileEntity -> new LazyCompoundTag(Suppliers.memoize(() -> {
         NbtMapBuilder builder = NbtMap.builder();
         tileEntity.saveAdditionalData(builder);
@@ -66,6 +69,7 @@ public class CloudburstGetBlocks extends CharGetBlocks {
     public NibbleArray[] skyLight = new NibbleArray[16];
 
     public CloudburstGetBlocks(Level world, int chunkX, int chunkZ) {
+        super(world.getMinY() >> 4, (world.getMaxY() - 1) >> 4);
         this.world = world;
         this.chunkX = chunkX;
         this.chunkZ = chunkZ;
@@ -81,17 +85,82 @@ public class CloudburstGetBlocks extends CharGetBlocks {
 
     @Override
     public BiomeType getBiomeType(int x, int y, int z) {
-        Biome biome = BiomeRegistry.get().getBiome(this.getChunk().getBiome(x & 0xf, z & 0xf));
+        Biome biome = EnumBiome.getBiome(this.getChunk().getBiome(x & 0xf, z & 0xf));
         return CloudburstAdapter.adapt(biome);
     }
 
     @Override
-    public CompoundTag getTile(int x, int y, int z) {
+    public void removeSectionLighting(final int layer, final boolean sky) {
+
+    }
+
+    @Override
+    public FaweCompoundTag tile(final int x, final int y, final int z) {
         BlockEntity entity = this.getChunk().getBlockEntity((x & 15), y, (z & 15));
         if (entity == null) {
             return null;
         }
         return CloudburstAdapter.adapt(entity.getChunkTag());
+    }
+
+    @Override
+    public boolean isCreateCopy() {
+        return false;
+    }
+
+    /**
+     * Not for external API use. Internal use only.
+     *
+     * @param createCopy
+     */
+    @Override
+    public int setCreateCopy(final boolean createCopy) {
+        return 0;
+    }
+
+    /**
+     * Flush the block lighting array (section*blocks) to the chunk GET between the given section indices. Negative allowed.
+     *
+     * @param lighting          lighting array
+     * @param startSectionIndex lowest section index
+     * @param endSectionIndex   highest section index
+     */
+    @Override
+    public void setLightingToGet(final char[][] lighting, final int startSectionIndex, final int endSectionIndex) {
+
+    }
+
+    /**
+     * Flush the sky lighting array (section*blocks) to the chunk GET between the given section indices. Negative allowed.
+     *
+     * @param lighting          sky lighting array
+     * @param startSectionIndex lowest section index
+     * @param endSectionIndex   highest section index
+     */
+    @Override
+    public void setSkyLightingToGet(final char[][] lighting, final int startSectionIndex, final int endSectionIndex) {
+
+    }
+
+    @Override
+    public void setHeightmapToGet(final HeightMapType type, final int[] data) {
+
+    }
+
+    /**
+     * Max y value for the chunk's world (inclusive)
+     */
+    @Override
+    public int getMaxY() {
+        return 0;
+    }
+
+    /**
+     * Min y value for the chunk's world (inclusive)
+     */
+    @Override
+    public int getMinY() {
+        return 0;
     }
 
     @Override
@@ -105,8 +174,23 @@ public class CloudburstGetBlocks extends CharGetBlocks {
     }
 
     @Override
+    public Map<BlockVector3, FaweCompoundTag> tiles() {
+        return Map.of();
+    }
+
+    @Override
     public int getSkyLight(int x, int y, int z) {
         return this.getChunk().getSkyLight(x & 0xf, y, z & 0xf);
+    }
+
+    @Override
+    public int getEmittedLight(final int x, final int y, final int z) {
+        return 0;
+    }
+
+    @Override
+    public int[] getHeightMap(final HeightMapType type) {
+        return new int[0];
     }
 
     @Override
@@ -130,6 +214,17 @@ public class CloudburstGetBlocks extends CharGetBlocks {
 //                }
 //            }
 //        }
+        return null;
+    }
+
+    /**
+     * {@return the compound tag describing the entity with the given UUID, if any}
+     *
+     * @param uuid the uuid of the entity
+     */
+    @Nullable
+    @Override
+    public FaweCompoundTag entity(final UUID uuid) {
         return null;
     }
 
@@ -181,6 +276,11 @@ public class CloudburstGetBlocks extends CharGetBlocks {
                 return result.iterator();
             }
         };
+    }
+
+    @Override
+    public Collection<FaweCompoundTag> entities() {
+        return List.of();
     }
 
     private void updateGet(CloudburstGetBlocks get, Chunk nmsChunk, ChunkSection[] sections, ChunkSection section, char[] arr, int layer) {
@@ -298,7 +398,7 @@ public class CloudburstGetBlocks extends CharGetBlocks {
                 }
 
                 // Biomes
-                BiomeType[] biomes = set.getBiomes();
+                BiomeType[][] biomes = set.getBiomes();
                 if (biomes != null) {
                     // set biomes
                     for (int z = 0, i = 0; z < 16; z++) {
@@ -350,14 +450,14 @@ public class CloudburstGetBlocks extends CharGetBlocks {
                     }
 
                     syncTasks[2] = () -> {
-                        final Set<Entity> entities = chunk.getEntities();
+                        final Set<Entity> entities = new HashSet<>(chunk.getEntities().values());
 
 
                         if (!entities.isEmpty()) {
                             final Iterator<Entity> iter = entities.iterator();
                             while (iter.hasNext()) {
                                 final Entity entity = iter.next();
-                                if (entityRemoves.contains(new UUID(0, entity.getUniqueId()))) {
+                                if (entityRemoves.contains(entity.getUniqueId())) {
                                     iter.remove();
                                     this.removeEntity(entity);
                                 }

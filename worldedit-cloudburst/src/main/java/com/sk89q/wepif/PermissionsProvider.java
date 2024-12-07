@@ -20,7 +20,7 @@
 package com.sk89q.wepif;
 
 
-import org.cloudburstmc.server.player.IPlayer;
+import cn.nukkit.IPlayer;
 
 public interface PermissionsProvider {
     boolean hasPermission(String name, String permission);

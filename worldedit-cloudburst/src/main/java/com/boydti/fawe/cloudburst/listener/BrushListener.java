@@ -7,16 +7,16 @@ import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.cloudburst.CloudburstAdapter;
 import com.sk89q.worldedit.cloudburst.CloudburstPlayer;
 import com.sk89q.worldedit.command.tool.Tool;
-import org.cloudburstmc.server.Server;
-import org.cloudburstmc.server.event.EventHandler;
-import org.cloudburstmc.server.event.EventPriority;
-import org.cloudburstmc.server.event.Listener;
-import org.cloudburstmc.server.event.player.PlayerInteractEvent;
-import org.cloudburstmc.server.event.player.PlayerItemHeldEvent;
-import org.cloudburstmc.server.event.player.PlayerMoveEvent;
-import org.cloudburstmc.server.level.Location;
-import org.cloudburstmc.server.player.Player;
-import org.cloudburstmc.server.plugin.Plugin;
+import cn.nukkit.Server;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.event.player.PlayerItemHeldEvent;
+import cn.nukkit.event.player.PlayerMoveEvent;
+import cn.nukkit.level.Location;
+import cn.nukkit.Player;
+import cn.nukkit.plugin.Plugin;
 
 public class BrushListener implements Listener {
     public BrushListener(Plugin plugin) {

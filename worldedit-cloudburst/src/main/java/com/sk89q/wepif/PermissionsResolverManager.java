@@ -21,13 +21,13 @@ package com.sk89q.wepif;
 
 import com.sk89q.util.yaml.YAMLFormat;
 import com.sk89q.util.yaml.YAMLProcessor;
-import org.cloudburstmc.server.Server;
-import org.cloudburstmc.server.event.EventHandler;
-import org.cloudburstmc.server.event.Listener;
-import org.cloudburstmc.server.event.plugin.PluginDisableEvent;
-import org.cloudburstmc.server.event.plugin.PluginEnableEvent;
-import org.cloudburstmc.server.player.IPlayer;
-import org.cloudburstmc.server.plugin.Plugin;
+import cn.nukkit.Server;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.plugin.PluginDisableEvent;
+import cn.nukkit.event.plugin.PluginEnableEvent;
+import cn.nukkit.IPlayer;
+import cn.nukkit.plugin.Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
