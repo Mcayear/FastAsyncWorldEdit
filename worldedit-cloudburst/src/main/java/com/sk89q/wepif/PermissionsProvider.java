@@ -19,7 +19,7 @@
 
 package com.sk89q.wepif;
 
-import org.bukkit.OfflinePlayer;
+import cn.nukkit.OfflinePlayer;
 
 public interface PermissionsProvider {
 

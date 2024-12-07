@@ -42,12 +42,13 @@ import com.sk89q.worldedit.world.gamemode.GameMode;
 import com.sk89q.worldedit.world.item.ItemType;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import org.bukkit.Material;
-import org.bukkit.block.Biome;
+//import org.bukkit.Material;
+import cn.nukkit.block.Block;
+import cn.nukkit.level.biome.Biome;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.Player;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
@@ -89,10 +90,10 @@ public enum BukkitAdapter {
      * Checks equality between a WorldEdit BlockType and a Bukkit Material.
      *
      * @param blockType The WorldEdit BlockType
-     * @param type      The Bukkit Material
+     * @param type      The Nukkit Block
      * @return If they are equal
      */
-    public static boolean equals(BlockType blockType, Material type) {
+    public static boolean equals(BlockType blockType, Block type) {
         //FAWE start - swapped reference to getAdapter
         return getAdapter().equals(blockType, type);
         //FAWE end
@@ -119,7 +120,7 @@ public enum BukkitAdapter {
      * @param world the Bukkit world
      * @return a WorldEdit world
      */
-    public static World adapt(org.bukkit.World world) {
+    public static World adapt(cn.nukkit.level.Level world) {
         //FAWE start - logic moved to IBukkitAdapter
         return getAdapter().adapt(world);
         //FAWE end
@@ -206,7 +207,7 @@ public enum BukkitAdapter {
      * @param world the WorldEdit world
      * @return a Bukkit world
      */
-    public static org.bukkit.World adapt(World world) {
+    public static cn.nukkit.level.Level adapt(World world) {
         //FAWE start - logic moved to IBukkitAdapter
         return getAdapter().adapt(world);
         //FAWE end
@@ -218,7 +219,7 @@ public enum BukkitAdapter {
      * @param location the Bukkit location
      * @return a WorldEdit location
      */
-    public static Location adapt(org.bukkit.Location location) {
+    public static Location adapt(cn.nukkit.level.Location location) {
         checkNotNull(location);
         Vector3 position = asVector(location);
         return new Location(
@@ -235,10 +236,10 @@ public enum BukkitAdapter {
      * @param location the WorldEdit location
      * @return a Bukkit location
      */
-    public static org.bukkit.Location adapt(Location location) {
+    public static cn.nukkit.level.Location adapt(Location location) {
         checkNotNull(location);
         Vector3 position = location;
-        return new org.bukkit.Location(
+        return new cn.nukkit.level.Location(
                 adapt((World) location.getExtent()),
                 position.x(), position.y(), position.z(),
                 location.getYaw(),
@@ -253,10 +254,10 @@ public enum BukkitAdapter {
      * @param position the WorldEdit position
      * @return a Bukkit location
      */
-    public static org.bukkit.Location adapt(org.bukkit.World world, Vector3 position) {
+    public static cn.nukkit.level.Location adapt(cn.nukkit.level.Level world, Vector3 position) {
         checkNotNull(world);
         checkNotNull(position);
-        return new org.bukkit.Location(
+        return new cn.nukkit.level.Location(
                 world,
                 position.x(), position.y(), position.z()
         );
@@ -269,10 +270,10 @@ public enum BukkitAdapter {
      * @param position the WorldEdit position
      * @return a Bukkit location
      */
-    public static org.bukkit.Location adapt(org.bukkit.World world, BlockVector3 position) {
+    public static cn.nukkit.level.Location adapt(cn.nukkit.level.Level world, BlockVector3 position) {
         checkNotNull(world);
         checkNotNull(position);
-        return new org.bukkit.Location(
+        return new cn.nukkit.level.Location(
                 world,
                 position.x(), position.y(), position.z()
         );
@@ -285,10 +286,10 @@ public enum BukkitAdapter {
      * @param location the WorldEdit location
      * @return a Bukkit location
      */
-    public static org.bukkit.Location adapt(org.bukkit.World world, Location location) {
+    public static cn.nukkit.level.Location adapt(cn.nukkit.level.Level world, Location location) {
         checkNotNull(world);
         checkNotNull(location);
-        return new org.bukkit.Location(
+        return new cn.nukkit.level.Location(
                 world,
                 location.x(), location.y(), location.z(),
                 location.getYaw(),
@@ -302,7 +303,7 @@ public enum BukkitAdapter {
      * @param location The Bukkit location
      * @return a WorldEdit vector
      */
-    public static Vector3 asVector(org.bukkit.Location location) {
+    public static Vector3 asVector(cn.nukkit.level.Location location) {
         checkNotNull(location);
         return Vector3.at(location.getX(), location.getY(), location.getZ());
     }
@@ -313,7 +314,7 @@ public enum BukkitAdapter {
      * @param location The Bukkit location
      * @return a WorldEdit vector
      */
-    public static BlockVector3 asBlockVector(org.bukkit.Location location) {
+    public static BlockVector3 asBlockVector(cn.nukkit.level.Location location) {
         checkNotNull(location);
         return BlockVector3.at(location.getX(), location.getY(), location.getZ());
     }
@@ -324,7 +325,7 @@ public enum BukkitAdapter {
      * @param entity the Bukkit entity
      * @return a WorldEdit entity
      */
-    public static Entity adapt(org.bukkit.entity.Entity entity) {
+    public static Entity adapt(cn.nukkit.entity.Entity entity) {
         //FAWE start - logic moved to IBukkitAdapter
         return getAdapter().adapt(entity);
         //FAWE end

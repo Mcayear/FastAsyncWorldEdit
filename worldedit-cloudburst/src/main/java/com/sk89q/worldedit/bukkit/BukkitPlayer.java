@@ -19,6 +19,8 @@
 
 package com.sk89q.worldedit.bukkit;
 
+import cn.nukkit.OfflinePlayer;
+import cn.nukkit.Server;
 import com.fastasyncworldedit.core.configuration.Caption;
 import com.fastasyncworldedit.core.configuration.Settings;
 import com.fastasyncworldedit.core.util.TaskManager;
@@ -52,13 +54,13 @@ import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldedit.world.gamemode.GameMode;
 import com.sk89q.worldedit.world.gamemode.GameModes;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import cn.nukkit.level.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerDropItemEvent;
+import cn.nukkit.item.Item;
+import cn.nukkit.Player;
+import cn.nukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
+import cn.nukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
 import org.enginehub.linbus.tree.LinCompoundTag;
 
@@ -230,7 +232,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
     @Override
     public boolean trySetPosition(Vector3 pos, float pitch, float yaw) {
         //FAWE start
-        org.bukkit.World world = player.getWorld();
+        cn.nukkit.level.Level world = player.getLevel();
         if (pos instanceof com.sk89q.worldedit.util.Location) {
             com.sk89q.worldedit.util.Location loc = (com.sk89q.worldedit.util.Location) pos;
             Extent extent = loc.getExtent();
@@ -238,15 +240,15 @@ public class BukkitPlayer extends AbstractPlayerActor {
                 world = Bukkit.getWorld(((World) extent).getName());
             }
         }
-        org.bukkit.World finalWorld = world;
+        cn.nukkit.level.Level finalWorld = world;
         //FAWE end
         return TaskManager.taskManager().sync(() -> player.teleport(new Location(
-                finalWorld,
                 pos.x(),
                 pos.y(),
                 pos.z(),
                 yaw,
-                pitch
+                pitch,
+                finalWorld
         )));
     }
 
@@ -274,7 +276,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
     public boolean hasPermission(String perm) {
         return (!plugin.getLocalConfiguration().noOpPermissions && player.isOp())
                 || plugin.getPermissionsResolver().hasPermission(
-                player.getWorld().getName(), player, perm);
+                player.getLevel().getName(), new OfflinePlayer(Server.getInstance(), player.getUniqueId()), perm);
     }
 
     //FAWE start
@@ -304,7 +306,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
 
     @Override
     public World getWorld() {
-        return BukkitAdapter.adapt(player.getWorld());
+        return BukkitAdapter.adapt(player.getLevel());
     }
 
     @Override
@@ -328,7 +330,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
 
     @Override
     public void setFlying(boolean flying) {
-        player.setFlying(flying);
+        player.setAllowFlight(flying);
     }
 
     @Override

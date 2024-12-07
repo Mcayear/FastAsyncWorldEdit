@@ -28,7 +28,7 @@ import java.util.function.Function;
  */
 public abstract class Regenerator {
 
-    protected final org.bukkit.World originalBukkitWorld;
+    protected final cn.nukkit.level.Level originalBukkitWorld;
     protected final Region region;
     protected final Extent target;
     protected final RegenOptions options;
@@ -45,7 +45,7 @@ public abstract class Regenerator {
      * @param target              the target {@code Extent} to paste the regenerated blocks into
      * @param options             the options to used while regenerating and pasting into the target {@code Extent}
      */
-    public Regenerator(org.bukkit.World originalBukkitWorld, Region region, Extent target, RegenOptions options) {
+    public Regenerator(cn.nukkit.level.Level originalBukkitWorld, Region region, Extent target, RegenOptions options) {
         this.originalBukkitWorld = originalBukkitWorld;
         this.region = region;
         this.target = target;
@@ -92,8 +92,8 @@ public abstract class Regenerator {
     private void createSource() {
 
         source = new SingleThreadQueueExtent(
-                BukkitWorld.HAS_MIN_Y ? originalBukkitWorld.getMinHeight() : 0,
-                BukkitWorld.HAS_MIN_Y ? originalBukkitWorld.getMaxHeight() : 256
+                originalBukkitWorld.getDimensionData().getMinHeight(),
+                originalBukkitWorld.getDimensionData().getMaxHeight()
         );
         source.init(target, initSourceQueueCache(), null);
     }

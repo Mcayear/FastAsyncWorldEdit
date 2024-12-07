@@ -56,21 +56,22 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.weather.WeatherType;
 import com.sk89q.worldedit.world.weather.WeatherTypes;
-import io.papermc.lib.PaperLib;
+//import io.papermc.lib.PaperLib;
 import org.apache.logging.log4j.Logger;
-import org.bukkit.Bukkit;
-import org.bukkit.Effect;
+import cn.nukkit.Server;
+import cn.nukkit.potion.Effect;
 import org.bukkit.TreeType;
-import org.bukkit.World;
-import org.bukkit.block.Block;
+import cn.nukkit.level.Level;
+import cn.nukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Chest;
-import org.bukkit.entity.Entity;
+import cn.nukkit.block.BlockChest;
+import cn.nukkit.entity.Entity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 import java.lang.ref.WeakReference;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -88,37 +89,25 @@ public class BukkitWorld extends AbstractWorld {
     private static final Logger LOGGER = LogManagerCompat.getLogger();
 
     private static final boolean HAS_3D_BIOMES;
-    //FAWE start - allow access for easy checking if World#getMin/MaxHeight exists
-    public static final boolean HAS_MIN_Y;
-    //FAWE end
-
-    private static final Map<Integer, Effect> effects = new HashMap<>();
 
     static {
-        for (Effect effect : Effect.values()) {
-            @SuppressWarnings("deprecation")
-            int id = effect.getId();
-            effects.put(id, effect);
-        }
-
         boolean temp;
         try {
-            World.class.getMethod("getBiome", int.class, int.class, int.class);
+            Level.class.getMethod("getBiomeId", int.class, int.class, int.class);
             temp = true;
         } catch (NoSuchMethodException e) {
             temp = false;
         }
         HAS_3D_BIOMES = temp;
         try {
-            World.class.getMethod("getMinHeight");
+            Level.class.getMethod("getMinHeight");
             temp = true;
         } catch (NoSuchMethodException e) {
             temp = false;
         }
-        HAS_MIN_Y = temp;
     }
 
-    protected WeakReference<World> worldRef;
+    protected WeakReference<Level> worldRef;
     //FAWE start
     protected final String worldNameRef;
     //FAWE end
@@ -129,7 +118,7 @@ public class BukkitWorld extends AbstractWorld {
      *
      * @param world the world
      */
-    public BukkitWorld(World world) {
+    public BukkitWorld(Level world) {
         this.worldRef = new WeakReference<>(world);
         //FAWE start
         this.worldNameRef = world.getName();
@@ -144,7 +133,7 @@ public class BukkitWorld extends AbstractWorld {
 
     @Override
     public List<com.sk89q.worldedit.entity.Entity> getEntities(Region region) {
-        World world = getWorld();
+        Level world = getWorld();
 
         List<Entity> ents = TaskManager.taskManager().sync(world::getEntities);
         List<com.sk89q.worldedit.entity.Entity> entities = new ArrayList<>();
@@ -174,11 +163,11 @@ public class BukkitWorld extends AbstractWorld {
      *
      * @return the world
      */
-    public World getWorld() {
+    public Level getWorld() {
         //FAWE start
-        World tmp = worldRef.get();
+        Level tmp = worldRef.get();
         if (tmp == null) {
-            tmp = Bukkit.getWorld(worldNameRef);
+            tmp = Server.getInstance().getLevelByName(worldNameRef);
             if (tmp != null) {
                 worldRef = new WeakReference<>(tmp);
             }
@@ -194,8 +183,8 @@ public class BukkitWorld extends AbstractWorld {
      *
      * @return the world
      */
-    protected World getWorldChecked() throws WorldEditException {
-        World tmp = worldRef.get();
+    protected Level getWorldChecked() throws WorldEditException {
+        Level tmp = worldRef.get();
         if (tmp == null) {
             tmp = Bukkit.getWorld(worldNameRef);
             if (tmp != null) {
@@ -230,16 +219,17 @@ public class BukkitWorld extends AbstractWorld {
 
     @Override
     public Path getStoragePath() {
-        Path worldFolder = getWorld().getWorldFolder().toPath();
-        switch (getWorld().getEnvironment()) {
-            case NETHER:
-                return worldFolder.resolve("DIM-1");
-            case THE_END:
-                return worldFolder.resolve("DIM1");
-            case NORMAL:
-            default:
-                return worldFolder;
-        }
+        return Paths.get(Server.getInstance().getDataPath(), "worlds", getWorld().getFolderName());
+//        Path worldFolder = getWorld().getWorldFolder().toPath();
+//        switch (getWorld().getDimension()) {
+//            case Level.DIMENSION_NETHER:
+//                return worldFolder.resolve("DIM-1");
+//            case Level.DIMENSION_THE_END:
+//                return worldFolder.resolve("DIM1");
+//            case Level.DIMENSION_OVERWORLD:
+//            default:
+//                return worldFolder;
+//        }
     }
 
     @Override
@@ -247,7 +237,7 @@ public class BukkitWorld extends AbstractWorld {
         //FAWE start - safe edit region
         testCoords(pt);
         //FAWE end
-        return getWorld().getBlockAt(pt.x(), pt.y(), pt.z()).getLightLevel();
+        return getWorld().getBlock(pt.x(), pt.y(), pt.z()).getLightLevel();
     }
 
     @Override
@@ -284,21 +274,21 @@ public class BukkitWorld extends AbstractWorld {
             return false;
         }
 
-        Block block = getWorld().getBlockAt(pt.x(), pt.y(), pt.z());
-        BlockState state = PaperLib.getBlockState(block, false).getState();
-        if (!(state instanceof InventoryHolder)) {
-            return false;
-        }
-
-        TaskManager.taskManager().sync(() -> {
-            InventoryHolder chest = (InventoryHolder) state;
-            Inventory inven = chest.getInventory();
-            if (chest instanceof Chest) {
-                inven = ((Chest) chest).getBlockInventory();
-            }
-            inven.clear();
-            return null;
-        });
+        Block block = getWorld().getBlock(pt.x(), pt.y(), pt.z());
+//        BlockState state = PaperLib.getBlockState(block, false).getState();
+//        if (!(state instanceof InventoryHolder)) {
+//            return false;
+//        }
+//
+//        TaskManager.taskManager().sync(() -> {
+//            InventoryHolder chest = (InventoryHolder) state;
+//            Inventory inven = chest.getInventory();
+//            if (chest instanceof BlockChest) {
+//                inven = ((BlockChest) chest).getBlockInventory();
+//            }
+//            inven.clear();
+//            return null;
+//        });
         return true;
     }
 
@@ -352,7 +342,7 @@ public class BukkitWorld extends AbstractWorld {
 
     @Override
     public void dropItem(Vector3 pt, BaseItemStack item) {
-        World world = getWorld();
+        Level world = getWorld();
         world.dropItemNaturally(BukkitAdapter.adapt(world, pt), BukkitAdapter.adapt(item));
     }
 
@@ -361,27 +351,27 @@ public class BukkitWorld extends AbstractWorld {
         //FAWE start - safe edit region
         testCoords(pt);
         //FAWE end
-        World world = getWorld();
+        Level world = getWorld();
         //FAWE start
         int X = pt.x() >> 4;
         int Z = pt.z() >> 4;
-        if (Fawe.isMainThread()) {
-            world.getChunkAt(X, Z);
-        } else if (PaperLib.isPaper()) {
-            PaperLib.getChunkAtAsync(world, X, Z, true);
-        }
+//        if (Fawe.isMainThread()) {
+            world.getChunk(X, Z);
+//        } else if (PaperLib.isPaper()) {
+//            PaperLib.getChunkAtAsync(world, X, Z, true);
+//        }
         //FAWE end
     }
 
     @Override
     public boolean equals(Object other) {
-        final World ref = worldRef.get();
+        final Level ref = worldRef.get();
         if (ref == null) {
             return false;
         } else if (other == null) {
             return false;
         } else if ((other instanceof BukkitWorld)) {
-            World otherWorld = ((BukkitWorld) other).worldRef.get();
+            Level otherWorld = ((BukkitWorld) other).worldRef.get();
             return ref.equals(otherWorld);
         } else if (other instanceof com.sk89q.worldedit.world.World) {
             return ((com.sk89q.worldedit.world.World) other).getName().equals(ref.getName());
@@ -397,21 +387,18 @@ public class BukkitWorld extends AbstractWorld {
 
     @Override
     public int getMaxY() {
-        return getWorld().getMaxHeight() - 1;
+        return getWorld().getDimensionData().getMinHeight() - 1;
     }
 
     @Override
     public int getMinY() {
-        if (HAS_MIN_Y) {
-            return getWorld().getMinHeight();
-        }
-        return super.getMinY();
+        return getWorld().getDimensionData().getMinHeight();
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public void fixAfterFastMode(Iterable<BlockVector2> chunks) {
-        World world = getWorld();
+        Level world = getWorld();
         for (BlockVector2 chunkPos : chunks) {
             world.refreshChunk(chunkPos.x(), chunkPos.z());
         }
@@ -419,9 +406,9 @@ public class BukkitWorld extends AbstractWorld {
 
     @Override
     public boolean playEffect(Vector3 position, int type, int data) {
-        World world = getWorld();
+        Level world = getWorld();
 
-        final Effect effect = effects.get(type);
+        final Effect effect = Effect.getEffect(type);
         if (effect == null) {
             return false;
         }
@@ -434,7 +421,7 @@ public class BukkitWorld extends AbstractWorld {
     //FAWE start - allow block break effect of non-legacy blocks
     @Override
     public boolean playBlockBreakEffect(Vector3 position, BlockType type) {
-        World world = getWorld();
+        Level world = getWorld();
         world.playEffect(BukkitAdapter.adapt(world, position), Effect.STEP_SOUND, BukkitAdapter.adapt(type));
         return true;
     }
@@ -626,7 +613,7 @@ public class BukkitWorld extends AbstractWorld {
     @Override
     public boolean fullySupports3DBiomes() {
         // Supports if API does and we're not in the overworld
-        return HAS_3D_BIOMES && getWorld().getEnvironment() != World.Environment.NORMAL || PaperLib.isVersion(18);
+        return HAS_3D_BIOMES && getWorld().getDimension() != Level.DIMENSION_OVERWORLD;
     }
 
     @SuppressWarnings("deprecation")

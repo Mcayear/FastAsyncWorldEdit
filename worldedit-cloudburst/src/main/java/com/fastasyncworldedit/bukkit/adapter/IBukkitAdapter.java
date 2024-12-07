@@ -30,13 +30,14 @@ import com.sk89q.worldedit.world.gamemode.GameModes;
 import com.sk89q.worldedit.world.item.ItemType;
 import com.sk89q.worldedit.world.item.ItemTypes;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
+import cn.nukkit.block.Block;
+//import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.TreeType;
-import org.bukkit.block.Biome;
+import cn.nukkit.level.biome.Biome;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Player;
+import cn.nukkit.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -73,7 +74,7 @@ public interface IBukkitAdapter {
      * @param world the WorldEdit world
      * @return a Bukkit world
      */
-    default org.bukkit.World adapt(World world) {
+    default cn.nukkit.level.Level adapt(World world) {
         checkNotNull(world);
         if (world instanceof BukkitWorld) {
             return ((BukkitWorld) world).getWorld();
@@ -153,7 +154,7 @@ public interface IBukkitAdapter {
      * @param entity the Bukkit entity
      * @return a WorldEdit entity
      */
-    default Entity adapt(org.bukkit.entity.Entity entity) {
+    default Entity adapt(cn.nukkit.entity.Entity entity) {
         checkNotNull(entity);
         return new BukkitEntity(entity);
     }
@@ -304,7 +305,7 @@ public interface IBukkitAdapter {
     }
 
     default BiomeType adapt(Biome biome) {
-        return BiomeTypes.get(biome.name().toLowerCase(Locale.ROOT));
+        return BiomeTypes.get(biome.getName().toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -314,7 +315,7 @@ public interface IBukkitAdapter {
      * @param type      The Bukkit Material
      * @return If they are equal
      */
-    default boolean equals(BlockType blockType, Material type) {
+    default boolean equals(BlockType blockType, Block type) {
         return blockType == asItemType(type).getBlockType();
     }
 
@@ -324,7 +325,7 @@ public interface IBukkitAdapter {
      * @param world the Bukkit world
      * @return a WorldEdit world
      */
-    default World adapt(org.bukkit.World world) {
+    default World adapt(cn.nukkit.level.Level world) {
         checkNotNull(world);
         return new BukkitWorld(world);
     }
