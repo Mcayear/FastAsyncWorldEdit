@@ -17,12 +17,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.wepif;
+package com.sk89q.bukkit.util;
 
-public interface PermissionsResolver extends PermissionsProvider {
+import org.bukkit.command.CommandMap;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
-    void load();
+public class FallbackRegistrationListener implements Listener {
 
-    String getDetectionMessage();
+    private final CommandMap commandRegistration;
+
+    public FallbackRegistrationListener(CommandMap commandRegistration) {
+        this.commandRegistration = commandRegistration;
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        if (commandRegistration.dispatch(event.getPlayer(), event.getMessage().substring(1))) {
+            event.setCancelled(true);
+        }
+    }
 
 }

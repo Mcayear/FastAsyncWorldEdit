@@ -17,12 +17,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.wepif;
+package com.sk89q.worldedit.bukkit;
 
-public interface PermissionsResolver extends PermissionsProvider {
+import com.sk89q.worldedit.bukkit.adapter.BukkitImplAdapter;
+import com.sk89q.worldedit.extension.platform.Watchdog;
 
-    void load();
+class BukkitWatchdog implements Watchdog {
 
-    String getDetectionMessage();
+    private final BukkitImplAdapter adapter;
+
+    BukkitWatchdog(BukkitImplAdapter adapter) {
+        this.adapter = adapter;
+    }
+
+    @Override
+    public void tick() {
+        adapter.tickWatchdog();
+    }
 
 }

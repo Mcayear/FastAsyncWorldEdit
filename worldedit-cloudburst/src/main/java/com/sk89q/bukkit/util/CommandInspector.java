@@ -17,12 +17,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.wepif;
+package com.sk89q.bukkit.util;
 
-public interface PermissionsResolver extends PermissionsProvider {
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 
-    void load();
+public interface CommandInspector {
 
-    String getDetectionMessage();
+    String getShortText(Command command);
+
+    String getFullText(Command command);
+
+    boolean testPermission(CommandSender sender, Command command);
 
 }

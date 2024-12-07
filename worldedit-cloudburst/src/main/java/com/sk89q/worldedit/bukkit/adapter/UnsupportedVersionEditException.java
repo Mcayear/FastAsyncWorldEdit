@@ -17,12 +17,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.wepif;
+package com.sk89q.worldedit.bukkit.adapter;
 
-public interface PermissionsResolver extends PermissionsProvider {
+import com.fastasyncworldedit.core.configuration.Caption;
+import com.sk89q.worldedit.WorldEditException;
 
-    void load();
+public class UnsupportedVersionEditException extends WorldEditException {
 
-    String getDetectionMessage();
+    public UnsupportedVersionEditException() {
+        super(Caption.of("worldedit.bukkit.no-edit-without-adapter"));
+    }
 
 }

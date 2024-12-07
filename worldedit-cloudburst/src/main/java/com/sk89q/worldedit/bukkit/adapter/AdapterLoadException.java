@@ -17,12 +17,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.wepif;
+package com.sk89q.worldedit.bukkit.adapter;
 
-public interface PermissionsResolver extends PermissionsProvider {
+/**
+ * Thrown when no adapter can be found.
+ */
+public class AdapterLoadException extends Exception {
 
-    void load();
+    public AdapterLoadException() {
+    }
 
-    String getDetectionMessage();
+    public AdapterLoadException(String message) {
+        super(message);
+    }
+
+    public AdapterLoadException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public AdapterLoadException(Throwable cause) {
+        super(cause);
+    }
 
 }
