@@ -29,16 +29,15 @@ import com.sk89q.worldedit.world.gamemode.GameMode;
 import com.sk89q.worldedit.world.gamemode.GameModes;
 import com.sk89q.worldedit.world.item.ItemType;
 import com.sk89q.worldedit.world.item.ItemTypes;
-import org.bukkit.Bukkit;
+import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 //import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.TreeType;
 import cn.nukkit.level.biome.Biome;
-import org.bukkit.block.data.BlockData;
 import cn.nukkit.Player;
-import org.bukkit.inventory.ItemStack;
+import cn.nukkit.item.Item;
 
 import java.util.List;
 import java.util.Locale;
@@ -79,7 +78,7 @@ public interface IBukkitAdapter {
         if (world instanceof BukkitWorld) {
             return ((BukkitWorld) world).getWorld();
         } else {
-            org.bukkit.World match = Bukkit.getServer().getWorld(world.getName());
+            cn.nukkit.level.Level match = Server.getInstance().getLevelByName(world.getName());
             if (match != null) {
                 return match;
             } else {
@@ -220,11 +219,11 @@ public interface IBukkitAdapter {
     /**
      * Converts a Material to a ItemType
      *
-     * @param material The material
+     * @param namespaceId The item namespaceId example:"minecraft:xxx"
      * @return The itemtype
      */
-    default ItemType asItemType(Material material) {
-        return ItemTypes.get(material.getKey().toString());
+    default ItemType asItemType(String namespaceId) {
+        return ItemTypes.get(namespaceId);
     }
 
     /**
@@ -233,8 +232,8 @@ public interface IBukkitAdapter {
      * @param blockData The Bukkit BlockData
      * @return The WorldEdit BlockState
      */
-    default BlockState adapt(BlockData blockData) {
-        String id = blockData.getAsString();
+    default BlockState adapt(Block blockData) {
+        String id = blockData.get();
         return BlockState.get(id);
     }
 
@@ -254,7 +253,7 @@ public interface IBukkitAdapter {
      * @param itemStack The Bukkit ItemStack
      * @return The WorldEdit BaseItemStack
      */
-    default BaseItemStack adapt(ItemStack itemStack) {
+    default BaseItemStack adapt(Item itemStack) {
         checkNotNull(itemStack);
         return new BukkitItemStack(itemStack);
     }
@@ -265,12 +264,14 @@ public interface IBukkitAdapter {
      * @param item The WorldEdit BaseItemStack
      * @return The Bukkit ItemStack
      */
-    default ItemStack adapt(BaseItemStack item) {
+    default Item adapt(BaseItemStack item) {
         checkNotNull(item);
         if (item instanceof BukkitItemStack) {
             return ((BukkitItemStack) item).getBukkitItemStack();
         }
-        return new ItemStack(adapt(item.getType()), item.getAmount());
+        Item result = Item.fromString(item.getType().id());
+        result.setCount(item.getAmount());
+        return result;
     }
 
     /**
@@ -316,7 +317,7 @@ public interface IBukkitAdapter {
      * @return If they are equal
      */
     default boolean equals(BlockType blockType, Block type) {
-        return blockType == asItemType(type).getBlockType();
+        return blockType == asItemType(type.toItem().getNamespaceId()).getBlockType();
     }
 
     /**
@@ -328,17 +329,6 @@ public interface IBukkitAdapter {
     default World adapt(cn.nukkit.level.Level world) {
         checkNotNull(world);
         return new BukkitWorld(world);
-    }
-
-    /**
-     * Create a WorldEdit GameMode from a Bukkit one.
-     *
-     * @param gameMode Bukkit GameMode
-     * @return WorldEdit GameMode
-     */
-    default GameMode adapt(org.bukkit.GameMode gameMode) {
-        checkNotNull(gameMode);
-        return GameModes.get(gameMode.name().toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -357,7 +347,7 @@ public interface IBukkitAdapter {
      * @param itemStack The Bukkit ItemStack
      * @return The WorldEdit BlockState
      */
-    default BlockState asBlockState(ItemStack itemStack) {
+    default BlockState asBlockState(Item itemStack) {
         checkNotNull(itemStack);
         if (itemStack.getType().isBlock()) {
             return adapt(itemStack.getType().createBlockData());

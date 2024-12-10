@@ -1,9 +1,9 @@
 package com.fastasyncworldedit.bukkit;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissibleBase;
-import org.bukkit.permissions.PermissionAttachment;
+import cn.nukkit.Player;
+import cn.nukkit.permission.PermissibleBase;
+import cn.nukkit.permission.PermissionAttachment;
 
 import javax.annotation.Nullable;
 import java.util.Map;

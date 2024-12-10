@@ -24,10 +24,9 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
+import cn.nukkit.level.Location;
+import cn.nukkit.event.Listener;
+import cn.nukkit.Player;
 
 import java.util.Collection;
 import java.util.Collections;

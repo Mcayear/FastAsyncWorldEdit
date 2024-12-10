@@ -10,9 +10,9 @@ import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
+import cn.nukkit.Player;
+import cn.nukkit.event.Listener;
+import cn.nukkit.plugin.Plugin;
 
 public class GriefPreventionFeature extends BukkitMaskManager implements Listener {
 

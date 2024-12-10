@@ -19,6 +19,7 @@
 
 package com.sk89q.worldedit.bukkit.adapter;
 
+import cn.nukkit.level.biome.EnumBiome;
 import com.fastasyncworldedit.bukkit.FaweBukkit;
 import com.fastasyncworldedit.bukkit.adapter.IBukkitAdapter;
 import com.fastasyncworldedit.bukkit.adapter.NMSRelighterFactory;
@@ -51,15 +52,16 @@ import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.item.ItemType;
 import com.sk89q.worldedit.world.registry.BlockMaterial;
 import org.bukkit.Keyed;
-import org.bukkit.Location;
+import cn.nukkit.level.Location;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
+import cn.nukkit.level.Level;
 import org.bukkit.WorldCreator;
-import org.bukkit.block.Biome;
+import cn.nukkit.level.biome.Biome;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.Player;
 import org.bukkit.inventory.ItemStack;
+import cn.nukkit.item.Item;
 import org.enginehub.linbus.tree.LinCompoundTag;
 import org.enginehub.linbus.tree.LinTag;
 
@@ -124,7 +126,7 @@ public interface BukkitImplAdapter<T> extends IBukkitAdapter {
      * @param world the world reference
      * @return the native access object
      */
-    WorldNativeAccess<?, ?, ?> createWorldNativeAccess(World world);
+    WorldNativeAccess<?, ?, ?> createWorldNativeAccess(Level world);
 
     /**
      * Get the state for the given entity.
@@ -203,7 +205,7 @@ public interface BukkitImplAdapter<T> extends IBukkitAdapter {
      * @param face     the direction in which to "face" when using the item
      * @return whether the usage was successful
      */
-    default boolean simulateItemUse(World world, BlockVector3 position, BaseItem item, Direction face) {
+    default boolean simulateItemUse(Level world, BlockVector3 position, BaseItem item, Direction face) {
         return false;
     }
 
@@ -215,7 +217,7 @@ public interface BukkitImplAdapter<T> extends IBukkitAdapter {
      * @param blockState The blockstate
      * @return If it can be placed
      */
-    boolean canPlaceAt(World world, BlockVector3 position, BlockState blockState);
+    boolean canPlaceAt(Level world, BlockVector3 position, BlockState blockState);
 
     /**
      * Create a Bukkit ItemStack with NBT, if available.
@@ -223,7 +225,7 @@ public interface BukkitImplAdapter<T> extends IBukkitAdapter {
      * @param item the WorldEdit BaseItemStack to adapt
      * @return the Bukkit ItemStack
      */
-    ItemStack adapt(BaseItemStack item);
+    Item adapt(BaseItemStack item);
 
     /**
      * Create a WorldEdit ItemStack with NBT, if available.
@@ -231,7 +233,7 @@ public interface BukkitImplAdapter<T> extends IBukkitAdapter {
      * @param itemStack the Bukkit ItemStack to adapt
      * @return the WorldEdit BaseItemStack
      */
-    BaseItemStack adapt(ItemStack itemStack);
+    BaseItemStack adapt(Item itemStack);
 
     /**
      * Get the {@link SideEffect}s that this adapter supports.
@@ -266,7 +268,7 @@ public interface BukkitImplAdapter<T> extends IBukkitAdapter {
      * @param options the regeneration options
      * @return true on success, false on failure
      */
-    default boolean regenerate(World world, Region region, Extent extent, RegenOptions options) throws Exception {
+    default boolean regenerate(Level world, Region region, Extent extent, RegenOptions options) throws Exception {
         throw new UnsupportedOperationException("This adapter does not support regeneration.");
     }
 
@@ -277,7 +279,7 @@ public interface BukkitImplAdapter<T> extends IBukkitAdapter {
      * @param pt    The location
      * @return If a block was cleared
      */
-    default boolean clearContainerBlockContents(World world, BlockVector3 pt) {
+    default boolean clearContainerBlockContents(Level world, BlockVector3 pt) {
         throw new UnsupportedOperationException("This adapter does not support clearing block contents.");
     }
 
@@ -318,7 +320,7 @@ public interface BukkitImplAdapter<T> extends IBukkitAdapter {
      * @param world  the world
      * @param chunks a list of chunk coordinates to send biome updates for
      */
-    default void sendBiomeUpdates(World world, Iterable<BlockVector2> chunks) {
+    default void sendBiomeUpdates(Level world, Iterable<BlockVector2> chunks) {
     }
 
     //FAWE start
@@ -330,48 +332,24 @@ public interface BukkitImplAdapter<T> extends IBukkitAdapter {
         return null;
     }
 
-    @Deprecated
-    default Tag toNative(T foreign) {
-        return LinBusConverter.toJnbtTag(toNativeLin(foreign));
-    }
-
-    default LinTag<?> toNativeLin(T foreign) {
-        return toNative(foreign).toLinTag();
-    }
-
-    @Deprecated
-    default T fromNative(Tag foreign) {
-        if (foreign == null) {
-            return null;
-        }
-        return fromNativeLin(foreign.toLinTag());
-    }
-
-    default T fromNativeLin(LinTag<?> foreign) {
-        if (foreign == null) {
-            return null;
-        }
-        return fromNative(LinBusConverter.toJnbtTag(foreign));
-    }
-
     @Nullable
-    default World createWorld(WorldCreator creator) {
+    default Level createWorld(WorldCreator creator) {
         return ((FaweBukkit) Fawe.platform()).createWorldUnloaded(creator::createWorld);
     }
 
     /**
      * Send a fake chunk packet to a player.
      */
-    default void sendFakeChunk(org.bukkit.World world, Player player, ChunkPacket packet) {
+    default void sendFakeChunk(cn.nukkit.level.Level world, Player player, ChunkPacket packet) {
         throw new UnsupportedOperationException("Cannot send fake chunks");
     }
 
-    default IChunkGet get(World world, int chunkX, int chunkZ) {
+    default IChunkGet get(Level world, int chunkX, int chunkZ) {
         throw new UnsupportedOperationException();
     }
 
     default int getInternalBiomeId(BiomeType biome) {
-        return Biome.BADLANDS.ordinal();
+        return EnumBiome.MESA.ordinal();
     }
 
     /**

@@ -1,118 +1,142 @@
 package com.fastasyncworldedit.bukkit.util;
 
-import com.fastasyncworldedit.core.util.ReflectionUtils;
-import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.jnbt.Tag;
+import com.sk89q.jnbt.*;
+import cn.nukkit.nbt.tag.Tag;
+
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.adapter.BukkitImplAdapter;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import org.bukkit.inventory.ItemStack;
+import cn.nukkit.item.Item;
+import org.enginehub.linbus.tree.*;
 
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.gson.internal.$Gson$Preconditions.checkNotNull;
 
 public class ItemUtil {
 
-    private final Method methodAsNMSCopy;
-    private final Method methodGetTag;
-    private final Method methodHasTag;
-    private final Method methodSetTag;
-    private final Method methodAsBukkitCopy;
-    private final Field fieldHandle;
     private final BukkitImplAdapter adapter;
-
-    private SoftReference<Int2ObjectOpenHashMap<WeakReference<Tag>>> hashToNMSTag = new SoftReference<>(new Int2ObjectOpenHashMap<>());
 
     public ItemUtil() throws Exception {
         this.adapter = WorldEditPlugin.getInstance().getBukkitImplAdapter();
         checkNotNull(adapter);
-        Class<?> classCraftItemStack = BukkitReflectionUtils.getCbClass("inventory.CraftItemStack");
-        Class<?> classNMSItem = BukkitReflectionUtils.getNmsClass("ItemStack");
-        this.methodAsNMSCopy = ReflectionUtils.setAccessible(classCraftItemStack.getDeclaredMethod("asNMSCopy", ItemStack.class));
-        this.methodHasTag = ReflectionUtils.setAccessible(classNMSItem.getDeclaredMethod("hasTag"));
-        this.methodGetTag = ReflectionUtils.setAccessible(classNMSItem.getDeclaredMethod("getTag"));
-        this.fieldHandle = ReflectionUtils.setAccessible(classCraftItemStack.getDeclaredField("handle"));
-        Class<?> classNBTTagCompound = BukkitReflectionUtils.getNmsClass("NBTTagCompound");
-        this.methodSetTag = ReflectionUtils.setAccessible(classNMSItem.getDeclaredMethod("setTag", classNBTTagCompound));
-        this.methodAsBukkitCopy = ReflectionUtils.setAccessible(classCraftItemStack.getDeclaredMethod(
-                "asBukkitCopy",
-                classNMSItem
-        ));
+        // Reflection classes are not used in this context, can be removed or implemented as needed
     }
 
-    public Object getNMSItem(ItemStack item) {
-        try {
-            Object nmsItem = fieldHandle.get(item);
-            if (nmsItem == null) {
-                nmsItem = methodAsNMSCopy.invoke(null, item);
-            }
-            return nmsItem;
-        } catch (Throwable e) {
-            e.printStackTrace();
+    public CompoundTag getNBT(Item item) {
+        cn.nukkit.nbt.tag.CompoundTag nukkitCompoundTag = item.getNamedTag();
+        return ItemUtil.toJNBT(nukkitCompoundTag);
+    }
+
+    public Item setNBT(Item item, CompoundTag tag) {
+        cn.nukkit.nbt.tag.CompoundTag nukkitTag = ItemUtil.toNukkit(tag);
+        item.setNamedTag(nukkitTag);
+        return item;
+    }
+
+    public static com.sk89q.jnbt.CompoundTag toJNBT(cn.nukkit.nbt.tag.CompoundTag nukkitTag) {
+        if (nukkitTag == null) return null;
+
+        Map<String, com.sk89q.jnbt.Tag<?, ?>> tags = new HashMap<>();
+        for (Map.Entry<String, Tag> entry : nukkitTag.getTags().entrySet()) {
+            tags.put(entry.getKey(), convertTag(entry.getValue()));
         }
-        return null;
+        return new com.sk89q.jnbt.CompoundTag(tags);
     }
 
+    public static cn.nukkit.nbt.tag.CompoundTag toNukkit(com.sk89q.jnbt.CompoundTag jnbtTag) {
+        if (jnbtTag == null) return null;
 
-    public CompoundTag getNBT(ItemStack item) {
-        try {
-            if (!item.hasItemMeta()) {
-                return null;
-            }
-            Object nmsItem = fieldHandle.get(item);
-            if (nmsItem == null) {
-                nmsItem = methodAsNMSCopy.invoke(null, item);
-            }
-            if (methodHasTag.invoke(nmsItem).equals(true)) {
-                Object nmsTag = methodGetTag.invoke(nmsItem);
-                if (nmsTag == null) {
-                    return null;
-                }
-
-                Int2ObjectOpenHashMap<WeakReference<Tag>> map = hashToNMSTag.get();
-                if (map == null) {
-                    map = new Int2ObjectOpenHashMap<>();
-                    hashToNMSTag = new SoftReference<>(new Int2ObjectOpenHashMap<>(map));
-                }
-                WeakReference<Tag> nativeTagRef = map.get(nmsTag.hashCode());
-                if (nativeTagRef != null) {
-                    Tag nativeTag = nativeTagRef.get();
-                    if (nativeTag != null) {
-                        return (CompoundTag) nativeTag;
-                    }
-                }
-                Tag nativeTag = adapter.toNative(nmsTag);
-                map.put(nmsTag.hashCode(), new WeakReference<>(nativeTag));
-                return null;
-            }
-        } catch (Throwable e) {
-            e.printStackTrace();
+        cn.nukkit.nbt.tag.CompoundTag result = new cn.nukkit.nbt.tag.CompoundTag("");
+        for (Map.Entry<String, com.sk89q.jnbt.Tag<?, ?>> entry : jnbtTag.getValue().entrySet()) {
+            result.put(entry.getKey(), convertTag(entry.getValue()));
         }
-        return null;
+        return result;
     }
 
-    public ItemStack setNBT(ItemStack item, CompoundTag tag) {
-        try {
-            Object nmsItem = fieldHandle.get(item);
-            boolean copy = false;
-            if (nmsItem == null) {
-                copy = true;
-                nmsItem = methodAsNMSCopy.invoke(null, item);
-            }
-            Object nmsTag = adapter.fromNative(tag);
-            methodSetTag.invoke(nmsItem, nmsTag);
-            if (copy) {
-                return (ItemStack) methodAsBukkitCopy.invoke(null, nmsItem);
-            }
-            return item;
-        } catch (Throwable e) {
-            e.printStackTrace();
+    private static com.sk89q.jnbt.Tag convertTag(Tag nukkitTag) {
+        if (nukkitTag instanceof cn.nukkit.nbt.tag.ByteTag) {
+            return new com.sk89q.jnbt.ByteTag(((cn.nukkit.nbt.tag.ByteTag) nukkitTag).getData().byteValue());
+        } else if (nukkitTag instanceof cn.nukkit.nbt.tag.ShortTag) {
+            return new com.sk89q.jnbt.ShortTag(((cn.nukkit.nbt.tag.ShortTag) nukkitTag).getData().shortValue());
+        } else if (nukkitTag instanceof cn.nukkit.nbt.tag.IntTag) {
+            return new com.sk89q.jnbt.IntTag(((cn.nukkit.nbt.tag.IntTag) nukkitTag).getData());
+        } else if (nukkitTag instanceof cn.nukkit.nbt.tag.LongTag) {
+            return new com.sk89q.jnbt.LongTag(((cn.nukkit.nbt.tag.LongTag) nukkitTag).getData());
+        } else if (nukkitTag instanceof cn.nukkit.nbt.tag.FloatTag) {
+            return new com.sk89q.jnbt.FloatTag(((cn.nukkit.nbt.tag.FloatTag) nukkitTag).getData());
+        } else if (nukkitTag instanceof cn.nukkit.nbt.tag.DoubleTag) {
+            return new com.sk89q.jnbt.DoubleTag(((cn.nukkit.nbt.tag.DoubleTag) nukkitTag).getData());
+        } else if (nukkitTag instanceof cn.nukkit.nbt.tag.ByteArrayTag) {
+            return new com.sk89q.jnbt.ByteArrayTag(((cn.nukkit.nbt.tag.ByteArrayTag) nukkitTag).getData());
+        } else if (nukkitTag instanceof cn.nukkit.nbt.tag.StringTag) {
+            return new com.sk89q.jnbt.StringTag(((cn.nukkit.nbt.tag.StringTag) nukkitTag).parseValue());
+        } else if (nukkitTag instanceof cn.nukkit.nbt.tag.ListTag) {
+            List<Tag> nukkitList = ((cn.nukkit.nbt.tag.ListTag) nukkitTag).getAll();
+            List<com.sk89q.jnbt.Tag> jnbtList = nukkitList.stream()
+                    .map(ItemUtil::convertTag)
+                    .collect(Collectors.toList());
+            return new com.sk89q.jnbt.ListTag(getListTagType(jnbtList), jnbtList);
+        } else if (nukkitTag instanceof cn.nukkit.nbt.tag.CompoundTag) {
+            return toJNBT((cn.nukkit.nbt.tag.CompoundTag) nukkitTag);
         }
-        return null;
+        throw new IllegalArgumentException("Unsupported tag type: " + nukkitTag.getClass().getName());
     }
 
+    private static Tag convertTag(com.sk89q.jnbt.Tag jnbtTag) {
+        if (jnbtTag instanceof com.sk89q.jnbt.ByteTag) {
+            return new cn.nukkit.nbt.tag.ByteTag("", ((com.sk89q.jnbt.ByteTag) jnbtTag).getValue());
+        } else if (jnbtTag instanceof com.sk89q.jnbt.ShortTag) {
+            return new cn.nukkit.nbt.tag.ShortTag("", ((com.sk89q.jnbt.ShortTag) jnbtTag).getValue());
+        } else if (jnbtTag instanceof com.sk89q.jnbt.IntTag) {
+            return new cn.nukkit.nbt.tag.IntTag("", ((com.sk89q.jnbt.IntTag) jnbtTag).getValue());
+        } else if (jnbtTag instanceof com.sk89q.jnbt.LongTag) {
+            return new cn.nukkit.nbt.tag.LongTag("", ((com.sk89q.jnbt.LongTag) jnbtTag).getValue());
+        } else if (jnbtTag instanceof com.sk89q.jnbt.FloatTag) {
+            return new cn.nukkit.nbt.tag.FloatTag("", ((com.sk89q.jnbt.FloatTag) jnbtTag).getValue());
+        } else if (jnbtTag instanceof com.sk89q.jnbt.DoubleTag) {
+            return new cn.nukkit.nbt.tag.DoubleTag("", ((com.sk89q.jnbt.DoubleTag) jnbtTag).getValue());
+        } else if (jnbtTag instanceof com.sk89q.jnbt.ByteArrayTag) {
+            return new cn.nukkit.nbt.tag.ByteArrayTag("", ((com.sk89q.jnbt.ByteArrayTag) jnbtTag).getValue());
+        } else if (jnbtTag instanceof com.sk89q.jnbt.StringTag) {
+            return new cn.nukkit.nbt.tag.StringTag("", ((com.sk89q.jnbt.StringTag) jnbtTag).getValue());
+        } else if (jnbtTag instanceof com.sk89q.jnbt.ListTag) {
+            cn.nukkit.nbt.tag.ListTag listTag = new cn.nukkit.nbt.tag.ListTag("");
+            LinListTag<? extends LinTag> linTagList = ((ListTag<?, ?>) jnbtTag).toLinTag();
+            for (LinTag<?> linTag : linTagList.value()) {
+                if (linTag instanceof LinByteTag) {
+                    listTag.add(new cn.nukkit.nbt.tag.ByteTag("", ((LinByteTag) linTag).value()));
+                } else if (linTag instanceof LinShortTag) {
+                    listTag.add(new cn.nukkit.nbt.tag.ShortTag("", ((LinShortTag) linTag).value()));
+                } else if (linTag instanceof LinIntTag) {
+                    listTag.add(new cn.nukkit.nbt.tag.IntTag("", ((LinIntTag) linTag).value()));
+                } else if (linTag instanceof LinLongTag) {
+                    listTag.add(new cn.nukkit.nbt.tag.LongTag("", ((LinLongTag) linTag).value()));
+                } else if (linTag instanceof LinFloatTag) {
+                    listTag.add(new cn.nukkit.nbt.tag.FloatTag("", ((LinFloatTag) linTag).value()));
+                } else if (linTag instanceof LinDoubleTag) {
+                    listTag.add(new cn.nukkit.nbt.tag.DoubleTag("", ((LinDoubleTag) linTag).value()));
+                } else if (linTag instanceof LinByteArrayTag) {
+                    listTag.add(new cn.nukkit.nbt.tag.ByteArrayTag("", ((LinByteArrayTag) linTag).value()));
+                } else if (linTag instanceof LinStringTag) {
+                    listTag.add(new cn.nukkit.nbt.tag.StringTag("", ((LinStringTag) linTag).value()));
+                } else if (linTag instanceof LinCompoundTag) {
+                    listTag.add(convertTag(new com.sk89q.jnbt.CompoundTag((LinCompoundTag) linTag)));
+                } else if (linTag instanceof LinListTag<?>) {
+                    listTag.add(convertTag(new com.sk89q.jnbt.ListTag<>((LinListTag) linTag)));
+                }
+            }
+            return listTag;
+        } else if (jnbtTag instanceof com.sk89q.jnbt.CompoundTag) {
+            return toNukkit((com.sk89q.jnbt.CompoundTag) jnbtTag);
+        }
+        throw new IllegalArgumentException("Unsupported tag type: " + jnbtTag.getClass().getName());
+    }
+
+    private static Class<? extends com.sk89q.jnbt.Tag> getListTagType(List<com.sk89q.jnbt.Tag> list) {
+        if (list.isEmpty()) {
+            return com.sk89q.jnbt.EndTag.class;
+        }
+        return list.get(0).getClass();
+    }
 }

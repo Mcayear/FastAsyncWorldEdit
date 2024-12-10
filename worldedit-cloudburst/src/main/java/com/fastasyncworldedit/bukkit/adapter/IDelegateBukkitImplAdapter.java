@@ -146,26 +146,6 @@ public interface IDelegateBukkitImplAdapter<T> extends BukkitImplAdapter<T> {
     }
 
     @Override
-    default Tag toNative(T foreign) {
-        return getParent().toNative(foreign);
-    }
-
-    @Override
-    default LinTag<?> toNativeLin(T foreign) {
-        return getParent().toNativeLin(foreign);
-    }
-
-    @Override
-    default T fromNative(Tag foreign) {
-        return getParent().fromNative(foreign);
-    }
-
-    @Override
-    default T fromNativeLin(LinTag foreign) {
-        return getParent().fromNativeLin(foreign);
-    }
-
-    @Override
     @Nullable
     default World createWorld(WorldCreator creator) {
         return getParent().createWorld(creator);
@@ -279,11 +259,6 @@ public interface IDelegateBukkitImplAdapter<T> extends BukkitImplAdapter<T> {
     @Override
     default com.sk89q.worldedit.world.World adapt(World world) {
         return getParent().adapt(world);
-    }
-
-    @Override
-    default GameMode adapt(org.bukkit.GameMode gameMode) {
-        return getParent().adapt(gameMode);
     }
 
     @Override

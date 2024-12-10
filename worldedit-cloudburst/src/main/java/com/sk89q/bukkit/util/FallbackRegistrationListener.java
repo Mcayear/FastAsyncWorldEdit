@@ -20,8 +20,8 @@
 package com.sk89q.bukkit.util;
 
 import org.bukkit.command.CommandMap;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 public class FallbackRegistrationListener implements Listener {

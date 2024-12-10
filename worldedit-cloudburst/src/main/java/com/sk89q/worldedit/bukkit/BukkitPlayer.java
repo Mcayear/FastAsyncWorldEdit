@@ -44,7 +44,7 @@ import com.sk89q.worldedit.util.formatting.component.TextUtils;
 import com.sk89q.worldedit.util.formatting.text.Component;
 import com.sk89q.worldedit.util.formatting.text.TextComponent;
 import com.sk89q.worldedit.util.formatting.text.TranslatableComponent;
-import com.sk89q.worldedit.util.formatting.text.adapter.bukkit.TextAdapter;
+//import com.sk89q.worldedit.util.formatting.text.adapter.bukkit.TextAdapter;
 import com.sk89q.worldedit.util.formatting.text.event.ClickEvent;
 import com.sk89q.worldedit.util.formatting.text.format.TextColor;
 import com.sk89q.worldedit.world.World;
@@ -53,15 +53,14 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldedit.world.gamemode.GameMode;
 import com.sk89q.worldedit.world.gamemode.GameModes;
-import org.bukkit.Bukkit;
+//import org.bukkit.Bukkit;
 import cn.nukkit.level.Location;
-import org.bukkit.Material;
-import cn.nukkit.item.Item;
+//import org.bukkit.Material;
 import cn.nukkit.Player;
 import cn.nukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.inventory.ItemStack;
+import cn.nukkit.item.Item;
 import cn.nukkit.inventory.PlayerInventory;
-import org.bukkit.permissions.PermissionAttachment;
+import cn.nukkit.permission.PermissionAttachment;
 import org.enginehub.linbus.tree.LinCompoundTag;
 
 import javax.annotation.Nonnull;
@@ -134,17 +133,17 @@ public class BukkitPlayer extends AbstractPlayerActor {
 
     @Override
     public BaseItemStack getItemInHand(HandSide handSide) {
-        ItemStack itemStack = handSide == HandSide.MAIN_HAND
-                ? player.getInventory().getItemInMainHand()
-                : player.getInventory().getItemInOffHand();
+        Item itemStack = handSide == HandSide.MAIN_HAND
+                ? player.getInventory().getItemInHand()
+                : player.getOffhandInventory().getItem(0);
         return BukkitAdapter.adapt(itemStack);
     }
 
     @Override
     public BaseBlock getBlockInHand(HandSide handSide) throws WorldEditException {
-        ItemStack itemStack = handSide == HandSide.MAIN_HAND
-                ? player.getInventory().getItemInMainHand()
-                : player.getInventory().getItemInOffHand();
+        Item itemStack = handSide == HandSide.MAIN_HAND
+                ? player.getInventory().getItemInHand()
+                : player.getOffhandInventory().getItem(0);
         return BukkitAdapter.asBlockState(itemStack).toBaseBlock();
     }
 
@@ -162,21 +161,21 @@ public class BukkitPlayer extends AbstractPlayerActor {
     @Override
     public void giveItem(BaseItemStack itemStack) {
         final PlayerInventory inv = player.getInventory();
-        ItemStack newItem = BukkitAdapter.adapt(itemStack);
+        Item newItem = BukkitAdapter.adapt(itemStack);
         TaskManager.taskManager().sync(() -> {
             if (itemStack.getType().id().equalsIgnoreCase(WorldEdit.getInstance().getConfiguration().wandItem)) {
                 inv.remove(newItem);
             }
-            final ItemStack item = player.getInventory().getItemInMainHand();
-            player.getInventory().setItemInMainHand(newItem);
-            HashMap<Integer, ItemStack> overflow = inv.addItem(item);
-            if (!overflow.isEmpty()) {
-                for (Map.Entry<Integer, ItemStack> entry : overflow.entrySet()) {
+            final Item item = player.getInventory().getItemInHand();
+            player.getInventory().setItemInHand(newItem);
+            Item[] overflow = inv.addItem(item);
+            if (overflow.length != 0) {
+                for (Map.Entry<Integer, Item> entry : overflow.entrySet()) {
                     ItemStack stack = entry.getValue();
                     if (stack.getType() != Material.AIR && stack.getAmount() > 0) {
                         Item dropped = player.getWorld().dropItem(player.getLocation(), stack);
                         PlayerDropItemEvent event = new PlayerDropItemEvent(player, dropped);
-                        Bukkit.getPluginManager().callEvent(event);
+                        Server.getInstance().getPluginManager().callEvent(event);
                         if (event.isCancelled()) {
                             dropped.remove();
                         }
@@ -226,7 +225,8 @@ public class BukkitPlayer extends AbstractPlayerActor {
         //FAWE start - Add FAWE prefix to all messages
         component = Caption.color(TranslatableComponent.of("prefix", component), getLocale());
         //FAWE end
-        TextAdapter.sendMessage(player, WorldEditText.format(component, getLocale()));
+        Component text = WorldEditText.format(component, getLocale());
+        player.sendMessage(text.toString());
     }
 
     @Override
@@ -237,7 +237,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
             com.sk89q.worldedit.util.Location loc = (com.sk89q.worldedit.util.Location) pos;
             Extent extent = loc.getExtent();
             if (extent instanceof World) {
-                world = Bukkit.getWorld(((World) extent).getName());
+                world = Server.getInstance().getLevelByName(((World) extent).getName());
             }
         }
         cn.nukkit.level.Level finalWorld = world;
@@ -264,12 +264,23 @@ public class BukkitPlayer extends AbstractPlayerActor {
 
     @Override
     public GameMode getGameMode() {
-        return GameModes.get(player.getGameMode().name().toLowerCase(Locale.ROOT));
+        return switch (player.getGamemode()) {
+            case 0 -> GameModes.SURVIVAL;
+            case 1 -> GameModes.CREATIVE;
+            case 3 -> GameModes.SPECTATOR;
+            default -> GameModes.ADVENTURE;
+        };
     }
 
     @Override
     public void setGameMode(GameMode gameMode) {
-        player.setGameMode(org.bukkit.GameMode.valueOf(gameMode.id().toUpperCase(Locale.ROOT)));
+        final int newGameMode = switch (gameMode.id()) {
+            case "survival" -> 0;
+            case "creative" -> 1;
+            case "spectator" -> 3;
+            default -> 2;
+        };
+        player.setGamemode(newGameMode);
     }
 
     @Override
@@ -345,8 +356,8 @@ public class BukkitPlayer extends AbstractPlayerActor {
         return new com.sk89q.worldedit.util.Location(
                 getWorld(),
                 position,
-                nativeLocation.getYaw(),
-                nativeLocation.getPitch()
+                (float) nativeLocation.getYaw(),
+                (float) nativeLocation.getPitch()
         );
     }
 
@@ -357,7 +368,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
 
     @Override
     public Locale getLocale() {
-        return TextUtils.getLocaleByMinecraftTag(player.getLocale());
+        return TextUtils.getLocaleByMinecraftTag(player.getLanguageCode().name());
     }
 
     @Override
@@ -424,11 +435,11 @@ public class BukkitPlayer extends AbstractPlayerActor {
 
     @Override
     public <B extends BlockStateHolder<B>> void sendFakeBlock(BlockVector3 pos, B block) {
-        Location loc = new Location(player.getWorld(), pos.x(), pos.y(), pos.z());
+        Location loc = new Location(pos.x(), pos.y(), pos.z(), player.getLevel());
         if (block == null) {
-            player.sendBlockChange(loc, player.getWorld().getBlockAt(loc).getBlockData());
+            player.getLevel().sendBlocks(player, new cn.nukkit.block.Block[]{player.getLevel().getBlock(loc)}, 0);
         } else {
-            player.sendBlockChange(loc, BukkitAdapter.adapt(block));
+            player.getLevel().sendBlocks(player, new cn.nukkit.block.Block[]{BukkitAdapter.adapt(block)}, 0);
             BukkitImplAdapter adapter = WorldEditPlugin.getInstance().getBukkitImplAdapter();
             if (adapter != null) {
                 if (block.getBlockType() == BlockTypes.STRUCTURE_BLOCK && block instanceof BaseBlock) {

@@ -42,11 +42,11 @@ import com.sk89q.worldedit.util.SideEffect;
 import com.sk89q.worldedit.util.lifecycle.Lifecycled;
 import com.sk89q.worldedit.world.DataFixer;
 import com.sk89q.worldedit.world.registry.Registries;
-import io.papermc.lib.PaperLib;
+//import io.papermc.lib.PaperLib;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
-import org.bukkit.World;
+import cn.nukkit.Server;
+import cn.nukkit.level.Level;
 import org.bukkit.entity.EntityType;
 import org.enginehub.piston.CommandManager;
 
@@ -131,7 +131,7 @@ public class BukkitServerInterface extends AbstractPlatform implements MultiUser
 
     @Override
     public int schedule(long delay, long period, Runnable task) {
-        return Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, task, delay, period);
+        return Server.getInstance().getScheduler().scheduleDelayedRepeatingTask(plugin, task, delay, period);
     }
 
     @Override
@@ -141,10 +141,10 @@ public class BukkitServerInterface extends AbstractPlatform implements MultiUser
 
     @Override
     public List<com.sk89q.worldedit.world.World> getWorlds() {
-        List<World> worlds = server.getWorlds();
+        List<Level> worlds = server.getLevels().values().stream().toList();
         List<com.sk89q.worldedit.world.World> ret = new ArrayList<>(worlds.size());
 
-        for (World world : worlds) {
+        for (Level world : worlds) {
             ret.add(BukkitAdapter.adapt(world));
         }
 
@@ -261,9 +261,9 @@ public class BukkitServerInterface extends AbstractPlatform implements MultiUser
 
     @Override
     public long getTickCount() {
-        if (PaperLib.isPaper()) {
-            return Bukkit.getCurrentTick();
-        }
+//        if (PaperLib.isPaper()) {
+//            return Bukkit.getCurrentTick();
+//        }
         return super.getTickCount();
     }
 
@@ -274,7 +274,7 @@ public class BukkitServerInterface extends AbstractPlatform implements MultiUser
     @Override
     public Collection<Actor> getConnectedUsers() {
         List<Actor> users = new ArrayList<>();
-        for (org.bukkit.entity.Player player : Bukkit.getServer().getOnlinePlayers()) {
+        for (cn.nukkit.Player player : Server.getInstance().getOnlinePlayers().values()) {
             users.add(WorldEditPlugin.getInstance().wrapPlayer(player));
         }
         return users;

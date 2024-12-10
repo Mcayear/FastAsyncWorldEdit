@@ -11,9 +11,9 @@ import com.sk89q.worldedit.internal.util.LogManagerCompat;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import org.apache.logging.log4j.Logger;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
+import cn.nukkit.Player;
+import cn.nukkit.event.Listener;
+import cn.nukkit.plugin.Plugin;
 
 public class GriefDefenderFeature extends BukkitMaskManager implements Listener {
 

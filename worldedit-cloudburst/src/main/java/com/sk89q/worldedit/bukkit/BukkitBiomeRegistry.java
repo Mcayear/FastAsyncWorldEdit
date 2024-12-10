@@ -25,7 +25,7 @@ import com.sk89q.worldedit.util.translation.TranslationManager;
 import com.sk89q.worldedit.world.biome.BiomeData;
 import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.registry.BiomeRegistry;
-import org.bukkit.block.Biome;
+import cn.nukkit.level.biome.Biome;
 
 import javax.annotation.Nullable;
 
@@ -48,8 +48,9 @@ class BukkitBiomeRegistry implements BiomeRegistry {
     @Nullable
     @Override
     public BiomeData getData(BiomeType biome) {
-        final Biome bukkitBiome = BukkitAdapter.adapt(biome);
-        return bukkitBiome == null ? null : bukkitBiome::name;
+//        final Biome bukkitBiome = BukkitAdapter.adapt(biome);
+//        return bukkitBiome == null ? null : bukkitBiome;
+        return null;
     }
 
 }

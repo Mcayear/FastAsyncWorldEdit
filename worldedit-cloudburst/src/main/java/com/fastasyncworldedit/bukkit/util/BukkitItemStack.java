@@ -6,49 +6,46 @@ import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.world.item.ItemType;
-import org.bukkit.inventory.ItemStack;
+import cn.nukkit.item.Item;
 
 import javax.annotation.Nullable;
 
 public class BukkitItemStack extends BaseItemStack {
 
-    private ItemStack stack;
+    private Item stack;
     private Object nativeItem;
     private boolean loadedNBT;
 
-    public BukkitItemStack(ItemStack stack) {
-        super(BukkitAdapter.asItemType(stack.getType()));
+    public BukkitItemStack(Item stack) {
+        super(BukkitAdapter.asItemType(stack.getNamespaceId()));
         this.stack = stack;
+        this.nativeItem = this;
     }
 
-    public BukkitItemStack(ItemType type, ItemStack stack) {
+    public BukkitItemStack(ItemType type, Item stack) {
         super(type);
         this.stack = stack;
     }
 
     @Override
     public int getAmount() {
-        return stack.getAmount();
+        return stack.getCount();
     }
 
     @Nullable
     @Override
     public Object getNativeItem() {
-        ItemUtil util = Fawe.<FaweBukkit>platform().getItemUtil();
-        if (util != null && nativeItem == null) {
-            return nativeItem = util.getNMSItem(stack);
-        }
         return nativeItem;
     }
 
-    public ItemStack getBukkitItemStack() {
+    public Item getBukkitItemStack() {
         return stack;
     }
 
     @Override
     public boolean hasNbtData() {
         if (!loadedNBT) {
-            return stack.hasItemMeta();
+            return stack.hasMeta();
         }
         return super.hasNbtData();
     }

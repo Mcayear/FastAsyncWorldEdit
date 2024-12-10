@@ -31,17 +31,17 @@ import com.sk89q.worldedit.internal.event.InteractionDebouncer;
 import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
-import org.bukkit.block.Block;
+import cn.nukkit.block.Block;
 import org.bukkit.event.Event.Result;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerCommandSendEvent;
-import org.bukkit.event.player.PlayerGameModeChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import cn.nukkit.event.server.ServerCommandEvent;
+import cn.nukkit.event.player.PlayerGameModeChangeEvent;
+import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.event.player.PlayerJoinEvent;
+import cn.nukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.inject.InjectedValueStore;
@@ -107,10 +107,13 @@ public class WorldEditListener implements Listener {
     //FAWE end
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onPlayerCommandSend(PlayerCommandSendEvent event) {
+    public void onPlayerCommandSend(ServerCommandEvent event) {
+        if (!event.getSender().isPlayer()) {
+            return;
+        }
         InjectedValueStore store = MapBackedValueStore.create();
         store.injectValue(Key.of(Actor.class), context ->
-                Optional.of(plugin.wrapCommandSender(event.getPlayer())));
+                Optional.of(plugin.wrapCommandSender(event.getSender())));
         CommandManager commandManager = plugin
                 .getWorldEdit()
                 .getPlatformManager()

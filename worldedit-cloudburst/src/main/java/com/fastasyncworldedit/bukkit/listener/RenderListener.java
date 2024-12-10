@@ -1,22 +1,23 @@
 package com.fastasyncworldedit.bukkit.listener;
 
+import cn.nukkit.Server;
 import com.fastasyncworldedit.core.Fawe;
 import com.fastasyncworldedit.core.configuration.Settings;
 import com.fastasyncworldedit.core.util.TaskManager;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.plugin.Plugin;
+import cn.nukkit.level.Location;
+import cn.nukkit.Player;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.player.PlayerJoinEvent;
+import cn.nukkit.event.player.PlayerMoveEvent;
+import cn.nukkit.event.player.PlayerQuitEvent;
+import cn.nukkit.event.player.PlayerTeleportEvent;
+import cn.nukkit.plugin.Plugin;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,7 +28,7 @@ public class RenderListener implements Listener {
     private int OFFSET = 6;
 
     public RenderListener(Plugin plugin) {
-        Bukkit.getPluginManager().registerEvents(this, plugin);
+        Server.getInstance().getPluginManager().registerEvents(this, plugin);
         TaskManager.taskManager().repeat(new Runnable() {
             private long last = 0;
 
@@ -59,12 +60,12 @@ public class RenderListener implements Listener {
                 int nowTick = (int) (Fawe.instance().getTimer().getTick());
                 while (entrySet.hasNext()) {
                     Map.Entry<UUID, int[]> entry = entrySet.next();
-                    Player player = Bukkit.getPlayer(entry.getKey());
-                    if (player != null) {
+                    Optional<Player> player = Server.getInstance().getPlayer(entry.getKey());
+                    if (player.isPresent()) {
                         int[] value = entry.getValue();
                         if (nowTick - value[1] >= timeOut) {
                             value[1] = nowTick + 1;
-                            setViewDistance(player, Math.max(4, value[0] + 1));
+                            setViewDistance(player.get(), Math.max(4, value[0] + 1));
                             long spent = System.currentTimeMillis() - now;
                             if (spent > 5) {
                                 if (spent > 10) {
@@ -117,7 +118,7 @@ public class RenderListener implements Listener {
     public void onPlayerMove(PlayerMoveEvent event) {
         Location from = event.getFrom();
         Location to = event.getTo();
-        if (from.getBlockX() >> OFFSET != to.getBlockX() >> OFFSET || from.getBlockZ() >> OFFSET != to.getBlockZ() >> OFFSET) {
+        if (from.getFloorX() >> OFFSET != to.getFloorX() >> OFFSET || from.getFloorZ() >> OFFSET != to.getFloorZ() >> OFFSET) {
             Player player = event.getPlayer();
             int currentView = getViewDistance(player);
             setViewDistance(player, Math.max(currentView - 1, 1));

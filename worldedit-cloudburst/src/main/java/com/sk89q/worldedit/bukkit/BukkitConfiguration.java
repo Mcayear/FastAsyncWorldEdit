@@ -38,7 +38,7 @@ public class BukkitConfiguration extends YAMLConfiguration {
     public boolean unsupportedVersionEditing = false;
 
     public BukkitConfiguration(YAMLProcessor config, WorldEditPlugin plugin) {
-        super(config, LogManager.getLogger(plugin.getLogger().getName()));
+        super(config, LogManager.getLogger(plugin.getName()));
         this.plugin = plugin;
     }
 
