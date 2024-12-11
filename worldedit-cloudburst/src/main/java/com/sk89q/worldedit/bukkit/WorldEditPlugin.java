@@ -27,7 +27,6 @@ import com.fastasyncworldedit.core.Fawe;
 import com.fastasyncworldedit.core.util.WEManager;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.sk89q.bukkit.util.ClassSourceValidator;
 import com.sk89q.util.yaml.YAMLProcessor;
 import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.EditSession;
@@ -190,12 +189,6 @@ public class WorldEditPlugin extends PluginBase {
      */
     @Override
     public void onEnable() {
-
-        // Catch bad things being done by naughty plugins that include
-        // WorldEdit's classes
-        ClassSourceValidator verifier = new ClassSourceValidator(this);
-        verifier.reportMismatches(ImmutableList.of(World.class, CommandManager.class, EditSession.class, Actor.class));
-
         //FAWE start
         new FaweBukkit(this);
         //FAWE end
@@ -205,15 +198,11 @@ public class WorldEditPlugin extends PluginBase {
         PermissionsResolverManager.initialize(this); // Setup permission resolver
 
         // Register CUI
-        getServer().getMessenger().registerIncomingPluginChannel(this, CUI_PLUGIN_CHANNEL, new CUIChannelListener(this));
-        getServer().getMessenger().registerOutgoingPluginChannel(this, CUI_PLUGIN_CHANNEL);
+//        getServer().getMessenger().registerIncomingPluginChannel(this, CUI_PLUGIN_CHANNEL, new CUIChannelListener(this));
+//        getServer().getMessenger().registerOutgoingPluginChannel(this, CUI_PLUGIN_CHANNEL);
 
         // Now we can register events
         getServer().getPluginManager().registerEvents(new WorldEditListener(this), this);
-        // register async tab complete, if available
-//        if (PaperLib.isPaper()) {
-//            getServer().getPluginManager().registerEvents(new AsyncTabCompleteListener(), this);
-//        }
 
         initializeRegistries(); // this creates the objects matching Bukkit's enums - but doesn't fill them with data yet
         if (Server.getInstance().getLevels().isEmpty()) {

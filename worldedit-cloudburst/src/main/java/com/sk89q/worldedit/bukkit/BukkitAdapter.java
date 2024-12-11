@@ -94,7 +94,7 @@ public enum BukkitAdapter {
      * @param type      The Nukkit Block
      * @return If they are equal
      */
-    public static boolean equals(BlockType blockType, Block type) {
+    public static boolean equals(BlockType blockType, Item type) {
         //FAWE start - swapped reference to getAdapter
         return getAdapter().equals(blockType, type);
         //FAWE end
@@ -337,7 +337,7 @@ public enum BukkitAdapter {
      * @param itemType The WorldEdit ItemType
      * @return The Bukkit Material
      */
-    public static Material adapt(ItemType itemType) {
+    public static Item adapt(ItemType itemType) {
         //FAWE start - logic moved to IBukkitAdapter
         return getAdapter().adapt(itemType);
         //FAWE end

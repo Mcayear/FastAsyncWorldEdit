@@ -29,15 +29,17 @@ import com.sk89q.worldedit.extent.inventory.OutOfBlocksException;
 import com.sk89q.worldedit.extent.inventory.OutOfSpaceException;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.block.BlockState;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import cn.nukkit.Player;
+import cn.nukkit.item.Item;
+
+import java.util.Map;
 
 //FAWE start - implements SlottableBlockBag
 public class BukkitPlayerBlockBag extends BlockBag implements SlottableBlockBag {
 //FAWE end
 
     private final Player player;
-    private ItemStack[] items;
+    private Map<Integer, Item> items;
 
     /**
      * Construct the object.
@@ -76,29 +78,29 @@ public class BukkitPlayerBlockBag extends BlockBag implements SlottableBlockBag 
 
         boolean found = false;
 
-        for (int slot = 0; slot < items.length; ++slot) {
-            ItemStack bukkitItem = items[slot];
+        for (var entry : items.entrySet()) {
+            Item item = entry.getValue();
 
-            if (bukkitItem == null) {
+            if (item == null) {
                 continue;
             }
 
-            if (!BukkitAdapter.equals(blockState.getBlockType(), bukkitItem.getType())) {
+            if (!BukkitAdapter.equals(blockState.getBlockType(), item)) {
                 // Type id doesn't fit
                 continue;
             }
 
-            int currentAmount = bukkitItem.getAmount();
+            int currentAmount = item.getCount();
             if (currentAmount < 0) {
                 // Unlimited
                 return;
             }
 
             if (currentAmount > 1) {
-                bukkitItem.setAmount(currentAmount - 1);
+                item.setCount(currentAmount - 1);
                 found = true;
             } else {
-                items[slot] = null;
+                items.put(entry.getKey(), null);
                 found = true;
             }
 
@@ -123,25 +125,25 @@ public class BukkitPlayerBlockBag extends BlockBag implements SlottableBlockBag 
 
         int freeSlot = -1;
 
-        for (int slot = 0; slot < items.length; ++slot) {
-            ItemStack bukkitItem = items[slot];
+        for (var entry : items.entrySet()) {
+            Item item = entry.getValue();
 
-            if (bukkitItem == null) {
+            if (item == null) {
                 // Delay using up a free slot until we know there are no stacks
                 // of this item to merge into
 
                 if (freeSlot == -1) {
-                    freeSlot = slot;
+                    freeSlot = entry.getKey();
                 }
                 continue;
             }
 
-            if (!BukkitAdapter.equals(blockState.getBlockType(), bukkitItem.getType())) {
+            if (!BukkitAdapter.equals(blockState.getBlockType(), item)) {
                 // Type id doesn't fit
                 continue;
             }
 
-            int currentAmount = bukkitItem.getAmount();
+            int currentAmount = item.getCount();
             if (currentAmount < 0) {
                 // Unlimited
                 return;
@@ -153,16 +155,16 @@ public class BukkitPlayerBlockBag extends BlockBag implements SlottableBlockBag 
 
             int spaceLeft = 64 - currentAmount;
             if (spaceLeft >= amount) {
-                bukkitItem.setAmount(currentAmount + amount);
+                item.setCount(currentAmount + amount);
                 return;
             }
 
-            bukkitItem.setAmount(64);
+            item.setCount(64);
             amount -= spaceLeft;
         }
 
         if (freeSlot > -1) {
-            items[freeSlot] = BukkitAdapter.adapt(new BaseItemStack(blockState.getBlockType().getItemType(), amount));
+            items.put(freeSlot, BukkitAdapter.adapt(new BaseItemStack(blockState.getBlockType().getItemType(), amount)));
             return;
         }
 
@@ -192,10 +194,7 @@ public class BukkitPlayerBlockBag extends BlockBag implements SlottableBlockBag 
     @Override
     public BaseItem getItem(int slot) {
         loadInventory();
-        if (items[slot] == null) {
-            return null;
-        }
-        return BukkitAdapter.adapt(items[slot]);
+        return BukkitAdapter.adapt(items.get(slot));
     }
 
     @Override
@@ -206,7 +205,7 @@ public class BukkitPlayerBlockBag extends BlockBag implements SlottableBlockBag 
                 block.getNbtData(),
                 1
         );
-        items[slot] = BukkitAdapter.adapt(stack);
+        items.put(slot, BukkitAdapter.adapt(stack));
     }
     //FAWE end
 

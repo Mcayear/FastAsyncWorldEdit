@@ -22,8 +22,8 @@ package com.sk89q.wepif;
 import com.sk89q.util.yaml.YAMLProcessor;
 import com.sk89q.worldedit.internal.util.LogManagerCompat;
 import org.apache.logging.log4j.Logger;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Server;
+import cn.nukkit.OfflinePlayer;
+import cn.nukkit.Server;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -94,16 +94,16 @@ public interface IBukkitAdapter {
      * @param position the WorldEdit position
      * @return a Bukkit location
      */
-    default org.bukkit.Location adapt(org.bukkit.World world, Vector3 position) {
+    default cn.nukkit.level.Location adapt(cn.nukkit.level.Level world, Vector3 position) {
         checkNotNull(world);
         checkNotNull(position);
-        return new org.bukkit.Location(
-                world,
-                position.x(), position.y(), position.z()
+        return new cn.nukkit.level.Location(
+                position.x(), position.y(), position.z(),
+                world
         );
     }
 
-    default org.bukkit.Location adapt(org.bukkit.World world, BlockVector3 position) {
+    default cn.nukkit.level.Location adapt(cn.nukkit.level.Level world, BlockVector3 position) {
         return adapt(world, position.toVector3());
     }
 
@@ -114,14 +114,14 @@ public interface IBukkitAdapter {
      * @param location the WorldEdit location
      * @return a Bukkit location
      */
-    default org.bukkit.Location adapt(org.bukkit.World world, Location location) {
+    default cn.nukkit.level.Location adapt(cn.nukkit.level.Level world, Location location) {
         checkNotNull(world);
         checkNotNull(location);
-        return new org.bukkit.Location(
-                world,
+        return new cn.nukkit.level.Location(
                 location.x(), location.y(), location.z(),
                 location.getYaw(),
-                location.getPitch()
+                location.getPitch(),
+                world
         );
     }
 
@@ -131,7 +131,7 @@ public interface IBukkitAdapter {
      * @param location The Bukkit location
      * @return a WorldEdit vector
      */
-    default Vector3 asVector(org.bukkit.Location location) {
+    default Vector3 asVector(cn.nukkit.level.Location location) {
         checkNotNull(location);
         return Vector3.at(location.getX(), location.getY(), location.getZ());
     }
@@ -142,7 +142,7 @@ public interface IBukkitAdapter {
      * @param location The Bukkit location
      * @return a WorldEdit vector
      */
-    default BlockVector3 asBlockVector(org.bukkit.Location location) {
+    default BlockVector3 asBlockVector(cn.nukkit.level.Location location) {
         checkNotNull(location);
         return BlockVector3.at(location.getX(), location.getY(), location.getZ());
     }
@@ -164,7 +164,7 @@ public interface IBukkitAdapter {
      * @param itemType The WorldEdit ItemType
      * @return The Bukkit Material
      */
-    default Material adapt(ItemType itemType) {
+    default Item adapt(ItemType itemType) {
         checkNotNull(itemType);
         if (!itemType.id().startsWith("minecraft:")) {
             throw new IllegalArgumentException("Bukkit only supports Minecraft items");
@@ -316,8 +316,8 @@ public interface IBukkitAdapter {
      * @param type      The Bukkit Material
      * @return If they are equal
      */
-    default boolean equals(BlockType blockType, Block type) {
-        return blockType == asItemType(type.toItem().getNamespaceId()).getBlockType();
+    default boolean equals(BlockType blockType, Item type) {
+        return blockType == asItemType(type.getNamespaceId()).getBlockType();
     }
 
     /**
@@ -365,7 +365,7 @@ public interface IBukkitAdapter {
      * @param world       World to "generate" tree from (seed-wise)
      * @return If successsful
      */
-    default boolean generateTree(TreeGenerator.TreeType type, EditSession editSession, BlockVector3 pt, org.bukkit.World world) {
+    default boolean generateTree(TreeGenerator.TreeType type, EditSession editSession, BlockVector3 pt, cn.nukkit.level.Level world) {
         TreeType bukkitType = BukkitWorld.toBukkitTreeType(type);
         if (bukkitType == TreeType.CHORUS_PLANT) {
             pt = pt.add(0, 1, 0); // bukkit skips the feature gen which does this offset normally, so we have to add it back
@@ -383,7 +383,7 @@ public interface IBukkitAdapter {
      * @param world world to retrieve entities in
      * @return list of {@link org.bukkit.entity.Entity}
      */
-    default List<org.bukkit.entity.Entity> getEntities(org.bukkit.World world) {
+    default List<org.bukkit.entity.Entity> getEntities(cn.nukkit.level.Level world) {
         return TaskManager.taskManager().sync(world::getEntities);
     }
 

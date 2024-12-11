@@ -19,8 +19,8 @@
 
 package com.sk89q.bukkit.util;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
 
 public interface CommandInspector {
 

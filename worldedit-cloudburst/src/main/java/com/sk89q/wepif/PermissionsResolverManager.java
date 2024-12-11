@@ -23,12 +23,12 @@ import com.sk89q.util.yaml.YAMLFormat;
 import com.sk89q.util.yaml.YAMLProcessor;
 import com.sk89q.worldedit.internal.util.LogManagerCompat;
 import org.apache.logging.log4j.Logger;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Server;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.plugin.Plugin;
+import cn.nukkit.OfflinePlayer;
+import cn.nukkit.Server;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.plugin.PluginDisableEvent;
+import cn.nukkit.event.plugin.PluginEnableEvent;
+import cn.nukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,11 +88,6 @@ public class PermissionsResolverManager implements PermissionsResolver {
     @SuppressWarnings("unchecked")
     protected Class<? extends PermissionsResolver>[] availableResolvers = new Class[]{
             PluginPermissionsResolver.class,
-            PermissionsExResolver.class,
-            bPermissionsResolver.class,
-            GroupManagerResolver.class,
-            NijiPermissionsResolver.class,
-            VaultResolver.class,
             DinnerPermsResolver.class,
             FlatFilePermissionsResolver.class
     };
@@ -275,7 +270,7 @@ public class PermissionsResolverManager implements PermissionsResolver {
 
     }
 
-    class ServerListener implements org.bukkit.event.Listener {
+    class ServerListener implements cn.nukkit.event.Listener {
 
         @EventHandler
         public void onPluginEnable(PluginEnableEvent event) {

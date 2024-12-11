@@ -1,11 +1,9 @@
 package com.fastasyncworldedit.bukkit.util;
 
 import com.google.common.collect.ComparisonChain;
-import io.papermc.lib.PaperLib;
-import org.bukkit.Bukkit;
+import cn.nukkit.network.protocol.ProtocolInfo;
 
 import javax.annotation.Nonnull;
-import java.util.regex.Pattern;
 
 /**
  * Utility class for retrieving and comparing minecraft server versions.
@@ -73,35 +71,26 @@ public class MinecraftVersion implements Comparable<MinecraftVersion> {
         int major;
         int minor;
         int release;
-        if (PaperLib.isPaper()) {
-            String[] parts = Bukkit.getMinecraftVersion().split(Pattern.quote("."));
-            if (parts.length != 2 && parts.length != 3) {
-                throw new IllegalStateException("Failed to determine minecraft version!");
-            }
-            major = Integer.parseInt(parts[0]);
-            minor = Integer.parseInt(parts[1]);
-            release = parts.length == 3 ? Integer.parseInt(parts[2]) : 0; // e.g. 1.18
-        } else {
-            String[] parts = getPackageVersion().split("_");
-            if (parts.length != 3) {
-                throw new IllegalStateException("Failed to determine minecraft version!");
-            }
-            major = Integer.parseInt(parts[0].substring(1));
-            minor = Integer.parseInt(parts[1]);
-            release = Integer.parseInt(parts[2].substring(1));
+
+        String[] parts = getPackageVersion().split("\\.");
+        if (parts.length != 3) {
+            throw new IllegalStateException("Failed to determine minecraft version!");
         }
+        major = Integer.parseInt(parts[0]);
+        minor = Integer.parseInt(parts[1]);
+        release = Integer.parseInt(parts[2]);
+
         return new MinecraftVersion(major, minor, release);
     }
 
     /**
-     * Determines the server version based on the CraftBukkit package path, e.g. {@code org.bukkit.craftbukkit.v1_16_R3},
-     * where v1_16_R3 is the resolved version.
+     * Determines the server version based on the CraftBukkit package path, e.g. {@code 1.21.50},
+     * where 1.21.50 is the resolved version.
      *
      * @return The package version.
      */
     private static String getPackageVersion() {
-        String fullPackagePath = Bukkit.getServer().getClass().getPackage().getName();
-        return fullPackagePath.substring(fullPackagePath.lastIndexOf('.') + 1);
+        return ProtocolInfo.MINECRAFT_VERSION;
     }
 
     /**

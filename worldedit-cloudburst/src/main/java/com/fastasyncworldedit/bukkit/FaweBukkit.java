@@ -3,13 +3,12 @@ package com.fastasyncworldedit.bukkit;
 import com.fastasyncworldedit.bukkit.adapter.BukkitQueueHandler;
 import com.fastasyncworldedit.bukkit.adapter.NMSAdapter;
 import com.fastasyncworldedit.bukkit.listener.BrushListener;
-import com.fastasyncworldedit.bukkit.listener.ChunkListener9;
 import com.fastasyncworldedit.bukkit.listener.RenderListener;
-import com.fastasyncworldedit.bukkit.regions.GriefDefenderFeature;
-import com.fastasyncworldedit.bukkit.regions.GriefPreventionFeature;
-import com.fastasyncworldedit.bukkit.regions.ResidenceFeature;
-import com.fastasyncworldedit.bukkit.regions.TownyFeature;
-import com.fastasyncworldedit.bukkit.regions.WorldGuardFeature;
+//import com.fastasyncworldedit.bukkit.regions.GriefDefenderFeature;
+//import com.fastasyncworldedit.bukkit.regions.GriefPreventionFeature;
+//import com.fastasyncworldedit.bukkit.regions.ResidenceFeature;
+//import com.fastasyncworldedit.bukkit.regions.TownyFeature;
+//import com.fastasyncworldedit.bukkit.regions.WorldGuardFeature;
 import com.fastasyncworldedit.bukkit.util.BukkitTaskManager;
 import com.fastasyncworldedit.bukkit.util.ItemUtil;
 import com.fastasyncworldedit.bukkit.util.MinecraftVersion;
@@ -19,28 +18,27 @@ import com.fastasyncworldedit.core.Fawe;
 import com.fastasyncworldedit.core.IFawe;
 import com.fastasyncworldedit.core.configuration.Settings;
 import com.fastasyncworldedit.core.queue.implementation.QueueHandler;
-import com.fastasyncworldedit.core.queue.implementation.preloader.AsyncPreloader;
 import com.fastasyncworldedit.core.queue.implementation.preloader.Preloader;
 import com.fastasyncworldedit.core.regions.FaweMaskManager;
 import com.fastasyncworldedit.core.util.TaskManager;
 import com.fastasyncworldedit.core.util.WEManager;
 import com.fastasyncworldedit.core.util.image.ImageViewer;
-import com.plotsquared.core.PlotSquared;
+//import com.plotsquared.core.PlotSquared;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.extension.platform.Capability;
 import com.sk89q.worldedit.internal.util.LogManagerCompat;
-import io.papermc.lib.PaperLib;
-import io.papermc.paper.datapack.Datapack;
+//import io.papermc.lib.PaperLib;
+//import io.papermc.paper.datapack.Datapack;
 import org.apache.logging.log4j.Logger;
-import org.bukkit.Bukkit;
+import cn.nukkit.Server;
 import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.world.WorldLoadEvent;
+import cn.nukkit.event.player.PlayerQuitEvent;
+import cn.nukkit.event.level.LevelLoadEvent;
 import cn.nukkit.plugin.Plugin;
 import cn.nukkit.plugin.PluginManager;
 
@@ -74,19 +72,17 @@ public class FaweBukkit implements IFawe, Listener {
             } catch (Throwable e) {
                 LOGGER.error("Brush Listener Failed", e);
             }
-            if (PaperLib.isPaper() && Settings.settings().EXPERIMENTAL.DYNAMIC_CHUNK_RENDERING > 1) {
-                new RenderListener(plugin);
-            }
         } catch (final Throwable e) {
             e.printStackTrace();
-            Bukkit.getServer().shutdown();
+            Server.getInstance().shutdown();
         }
 
         MinecraftVersion version = MinecraftVersion.getCurrent();
 
         chunksStretched = version.isEqualOrHigherThan(MinecraftVersion.NETHER);
 
-        platformAdapter = new NMSAdapter();
+//        platformAdapter = new NMSAdapter();
+        platformAdapter = BukkitPlatformAdapter.INSTANCE;
 
         //PlotSquared support is limited to Spigot/Paper as of 02/20/2020
         TaskManager.taskManager().later(this::setupPlotSquared, 0);
@@ -94,14 +90,11 @@ public class FaweBukkit implements IFawe, Listener {
         // Registered delayed Event Listeners
         TaskManager.taskManager().task(() -> {
             // Fix for ProtocolSupport
-            Settings.settings().PROTOCOL_SUPPORT_FIX =
-                    Bukkit.getPluginManager().isPluginEnabled("ProtocolSupport");
+//            Settings.settings().PROTOCOL_SUPPORT_FIX =
+//                    Bukkit.getPluginManager().isPluginEnabled("ProtocolSupport");
 
             // This class
-            Bukkit.getPluginManager().registerEvents(FaweBukkit.this, FaweBukkit.this.plugin);
-
-            // The tick limiter
-            new ChunkListener9();
+            Server.getInstance().getPluginManager().registerEvents(FaweBukkit.this, FaweBukkit.this.plugin);
         });
 
         // Warn if small-edits are enabled with extended world heights
@@ -118,7 +111,7 @@ public class FaweBukkit implements IFawe, Listener {
     @Override
     public synchronized ImageViewer getImageViewer(com.sk89q.worldedit.entity.Player player) {
         try {
-            PluginManager manager = Bukkit.getPluginManager();
+            PluginManager manager = Server.getInstance().getPluginManager();
 
             if (manager.getPlugin("PacketListenerApi") == null) {
                 LOGGER.error("PacketListener not found! Please install PacketListenerAPI v3.7.6 or above before attempting to " +
@@ -159,11 +152,10 @@ public class FaweBukkit implements IFawe, Listener {
         msg.append("# FastAsyncWorldEdit Information\n");
         msg.append(Fawe.instance().getVersion()).append("\n\n");
 
-        List<Plugin> plugins = new ArrayList<>();
-        Collections.addAll(plugins, Bukkit.getServer().getPluginManager().getPlugins());
+        List<Plugin> plugins = new ArrayList<>(Server.getInstance().getPluginManager().getPlugins().values());
         plugins.sort(Comparator.comparing(Plugin::getName));
 
-        msg.append("Server Version: ").append(Bukkit.getVersion()).append("\n");
+        msg.append("Server Version: ").append(Server.getInstance().getVersion()).append("\n");
         msg.append("Plugins (").append(plugins.size()).append("):\n");
         for (Plugin p : plugins) {
             msg.append(" - ").append(p.getName()).append(":").append("\n")
@@ -173,17 +165,16 @@ public class FaweBukkit implements IFawe, Listener {
                     .append("  • Authors: ").append(p.getDescription().getAuthors()).append("\n")
                     .append("  • Load Before: ").append(p.getDescription().getLoadBefore()).append("\n")
                     .append("  • Dependencies: ").append(p.getDescription().getDepend()).append("\n")
-                    .append("  • Soft Dependencies: ").append(p.getDescription().getSoftDepend()).append("\n")
-                    .append("  • Provides: ").append(p.getDescription().getProvides()).append("\n");
+                    .append("  • Soft Dependencies: ").append(p.getDescription().getSoftDepend()).append("\n");
         }
         int dataVersion = WorldEdit.getInstance().getPlatformManager().queryCapability(Capability.GAME_HOOKS).getDataVersion();
-        if (dataVersion >= 2586 && PaperLib.isPaper()) {
-            Collection<Datapack> datapacks = Bukkit.getServer().getDatapackManager().getEnabledPacks();
-            msg.append("Enabled Datapacks (").append(datapacks.size()).append("):\n");
-            for (Datapack dp : datapacks) {
-                msg.append(" - ").append(dp.getName()).append("\n");
-            }
-        }
+//        if (dataVersion >= 2586 && PaperLib.isPaper()) {
+//            Collection<Datapack> datapacks = Bukkit.getServer().getDatapackManager().getEnabledPacks();
+//            msg.append("Enabled Datapacks (").append(datapacks.size()).append("):\n");
+//            for (Datapack dp : datapacks) {
+//                msg.append(" - ").append(dp.getName()).append("\n");
+//            }
+//        }
         return msg.toString();
     }
 
@@ -205,16 +196,16 @@ public class FaweBukkit implements IFawe, Listener {
     @Override
     public Collection<FaweMaskManager> getMaskManagers() {
         final Plugin worldguardPlugin =
-                Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");
+                Server.getInstance().getPluginManager().getPlugin("WorldGuard");
         final ArrayList<FaweMaskManager> managers = new ArrayList<>();
-        if (worldguardPlugin != null && worldguardPlugin.isEnabled()) {
+        /* if (worldguardPlugin != null && worldguardPlugin.isEnabled()) {
             try {
                 managers.add(new WorldGuardFeature(worldguardPlugin));
                 LOGGER.info("Attempting to use plugin 'WorldGuard'");
             } catch (Throwable ignored) {
             }
         }
-        final Plugin townyPlugin = Bukkit.getServer().getPluginManager().getPlugin("Towny");
+        final Plugin townyPlugin = Server.getInstance().getPluginManager().getPlugin("Towny");
         if (townyPlugin != null && townyPlugin.isEnabled()) {
             try {
                 managers.add(new TownyFeature(townyPlugin));
@@ -222,7 +213,7 @@ public class FaweBukkit implements IFawe, Listener {
             } catch (Throwable ignored) {
             }
         }
-        final Plugin residencePlugin = Bukkit.getServer().getPluginManager().getPlugin("Residence");
+        final Plugin residencePlugin = Server.getInstance().getPluginManager().getPlugin("Residence");
         if (residencePlugin != null && residencePlugin.isEnabled()) {
             try {
                 managers.add(new ResidenceFeature(residencePlugin));
@@ -231,7 +222,7 @@ public class FaweBukkit implements IFawe, Listener {
             }
         }
         final Plugin griefpreventionPlugin =
-                Bukkit.getServer().getPluginManager().getPlugin("GriefPrevention");
+                Server.getInstance().getPluginManager().getPlugin("GriefPrevention");
         if (griefpreventionPlugin != null && griefpreventionPlugin.isEnabled()) {
             try {
                 managers.add(new GriefPreventionFeature(griefpreventionPlugin));
@@ -240,23 +231,23 @@ public class FaweBukkit implements IFawe, Listener {
             }
         }
         final Plugin griefdefenderPlugin =
-                Bukkit.getServer().getPluginManager().getPlugin("GriefDefender");
+                Server.getInstance().getPluginManager().getPlugin("GriefDefender");
         if (griefdefenderPlugin != null && griefdefenderPlugin.isEnabled()) {
             try {
                 managers.add(new GriefDefenderFeature(griefdefenderPlugin));
                 LOGGER.info("Attempting to use plugin 'GriefDefender'");
             } catch (Throwable ignored) {
             }
-        }
+        } */
 
         return managers;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onWorldLoad(WorldLoadEvent event) {
+    public void onWorldLoad(LevelLoadEvent event) {
         if (keepUnloaded) {
-            org.bukkit.World world = event.getWorld();
-            world.setKeepSpawnInMemory(false);
+//            cn.nukkit.level.Level world = event.getLevel();
+//            world.setKeepSpawnInMemory(false);
         }
     }
 
@@ -278,27 +269,21 @@ public class FaweBukkit implements IFawe, Listener {
 
     @Override
     public String getPlatform() {
-        return "Bukkit";
+        return "Nukkit-MOT";
     }
 
     @Override
     public UUID getUUID(String name) {
-        return Bukkit.getOfflinePlayer(name).getUniqueId();
+        return Server.getInstance().getOfflinePlayer(name).getUniqueId();
     }
 
     @Override
     public String getName(UUID uuid) {
-        return Bukkit.getOfflinePlayer(uuid).getName();
+        return Server.getInstance().getOfflinePlayer(uuid).getName();
     }
 
     @Override
     public Preloader getPreloader(boolean initialise) {
-        if (PaperLib.isPaper()) {
-            if (preloader == null && initialise) {
-                return preloader = new AsyncPreloader();
-            }
-            return preloader;
-        }
         return null;
     }
 
@@ -317,13 +302,13 @@ public class FaweBukkit implements IFawe, Listener {
         if (plotSquared == null) {
             return;
         }
-        if (PlotSquared.get().getVersion().version[0] == 7) {
-            WEManager.weManager().addManager(new com.fastasyncworldedit.bukkit.regions.plotsquared.PlotSquaredFeature());
-            LOGGER.info("Plugin 'PlotSquared' v7 found. Using it now.");
-        } else {
-            LOGGER.error("Incompatible version of PlotSquared found. Please use PlotSquared v7.");
-            LOGGER.info("https://www.spigotmc.org/resources/77506/");
-        }
+//        if (PlotSquared.get().getVersion().version[0] == 7) {
+//            WEManager.weManager().addManager(new com.fastasyncworldedit.bukkit.regions.plotsquared.PlotSquaredFeature());
+//            LOGGER.info("Plugin 'PlotSquared' v7 found. Using it now.");
+//        } else {
+//            LOGGER.error("Incompatible version of PlotSquared found. Please use PlotSquared v7.");
+//            LOGGER.info("https://www.spigotmc.org/resources/77506/");
+//        }
     }
 
 }

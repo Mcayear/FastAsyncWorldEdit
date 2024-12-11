@@ -27,12 +27,11 @@ import com.sk89q.worldedit.util.auth.AuthorizationException;
 import com.sk89q.worldedit.util.formatting.WorldEditText;
 import com.sk89q.worldedit.util.formatting.text.Component;
 import com.sk89q.worldedit.util.formatting.text.TextComponent;
-import com.sk89q.worldedit.util.formatting.text.adapter.bukkit.TextAdapter;
 import com.sk89q.worldedit.util.formatting.text.format.TextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.command.BlockCommandSender;
+import cn.nukkit.Server;
+import cn.nukkit.block.Block;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.block.BlockCommandBlock;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -44,12 +43,12 @@ public class BukkitBlockCommandSender extends AbstractCommandBlockActor {
 
     private static final String UUID_PREFIX = "CMD";
 
-    private final BlockCommandSender sender;
+    private final CommandSender sender;
     private final WorldEditPlugin plugin;
     private final UUID uuid;
 
-    public BukkitBlockCommandSender(WorldEditPlugin plugin, BlockCommandSender sender) {
-        super(BukkitAdapter.adapt(checkNotNull(sender).getBlock().getLocation()));
+    public BukkitBlockCommandSender(WorldEditPlugin plugin, CommandSender sender) {
+        super(BukkitAdapter.adapt(checkNotNull(sender).getLocation()));
         checkNotNull(plugin);
 
         this.plugin = plugin;
@@ -118,7 +117,7 @@ public class BukkitBlockCommandSender extends AbstractCommandBlockActor {
     public void print(Component component) {
         //FAWE start - ensure executed on main thread
         TaskManager.taskManager().sync(() -> {
-            TextAdapter.sendMessage(sender, WorldEditText.format(component, getLocale()));
+//            TextAdapter.sendMessage(sender, WorldEditText.format(component, getLocale()));
             return null;
         });
         //FAWE end
@@ -162,7 +161,7 @@ public class BukkitBlockCommandSender extends AbstractCommandBlockActor {
     public void setPermission(String permission, boolean value) {
     }
 
-    public BlockCommandSender getSender() {
+    public CommandSender getSender() {
         return this.sender;
     }
 
@@ -173,15 +172,12 @@ public class BukkitBlockCommandSender extends AbstractCommandBlockActor {
             private volatile boolean active = true;
 
             private void updateActive() {
-                Block block = sender.getBlock();
-                if (!block.getWorld().isChunkLoaded(block.getX() >> 4, block.getZ() >> 4)) {
-                    active = false;
-                    return;
-                }
-                Material type = block.getType();
-                active = type == Material.COMMAND_BLOCK
-                        || type == Material.CHAIN_COMMAND_BLOCK
-                        || type == Material.REPEATING_COMMAND_BLOCK;
+//                Block block = sender.getBlock();
+//                if (!block.getLevel().isChunkLoaded(block.getChunkX(), block.getChunkZ())) {
+//                    active = false;
+//                    return;
+//                }
+//                active = block instanceof BlockCommandBlock;
             }
 
             @Override
@@ -191,17 +187,14 @@ public class BukkitBlockCommandSender extends AbstractCommandBlockActor {
 
             @Override
             public boolean isActive() {
-                if (Bukkit.isPrimaryThread()) {
+                if (Server.getInstance().isPrimaryThread()) {
                     // we can update eagerly
                     updateActive();
                 } else {
                     // we should update it eventually
-                    Bukkit.getScheduler().callSyncMethod(
+                    Server.getInstance().getScheduler().scheduleTask(
                             plugin,
-                            () -> {
-                                updateActive();
-                                return null;
-                            }
+                            this::updateActive
                     );
                 }
                 return active;

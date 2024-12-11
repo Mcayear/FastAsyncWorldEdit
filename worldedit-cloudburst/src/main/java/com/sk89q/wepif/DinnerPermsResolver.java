@@ -20,15 +20,16 @@
 package com.sk89q.wepif;
 
 import com.sk89q.util.yaml.YAMLProcessor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permissible;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachmentInfo;
+import cn.nukkit.OfflinePlayer;
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.permission.Permissible;
+import cn.nukkit.permission.Permission;
+import cn.nukkit.permission.PermissionAttachmentInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DinnerPermsResolver implements PermissionsResolver {
 
@@ -50,25 +51,25 @@ public class DinnerPermsResolver implements PermissionsResolver {
     @Override
     @SuppressWarnings("deprecation")
     public boolean hasPermission(String name, String permission) {
-        return hasPermission(server.getOfflinePlayer(name), permission);
+        return hasPermission((OfflinePlayer) server.getOfflinePlayer(name), permission);
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public boolean hasPermission(String worldName, String name, String permission) {
-        return hasPermission(worldName, server.getOfflinePlayer(name), permission);
+        return hasPermission(worldName, (OfflinePlayer) server.getOfflinePlayer(name), permission);
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public boolean inGroup(String name, String group) {
-        return inGroup(server.getOfflinePlayer(name), group);
+        return inGroup((OfflinePlayer) server.getOfflinePlayer(name), group);
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public String[] getGroups(String name) {
-        return getGroups(server.getOfflinePlayer(name));
+        return getGroups((OfflinePlayer) server.getOfflinePlayer(name));
     }
 
     @Override
@@ -123,7 +124,7 @@ public class DinnerPermsResolver implements PermissionsResolver {
             return new String[0];
         }
         List<String> groupNames = new ArrayList<>();
-        for (PermissionAttachmentInfo permAttach : perms.getEffectivePermissions()) {
+        for (PermissionAttachmentInfo permAttach : perms.getEffectivePermissions().values()) {
             String perm = permAttach.getPermission();
             if (!(perm.startsWith(GROUP_PREFIX) && permAttach.getValue())) {
                 continue;
@@ -163,7 +164,7 @@ public class DinnerPermsResolver implements PermissionsResolver {
         } else {
             Permission perm = server.getPluginManager().getPermission(permission);
             if (perm != null) {
-                return perm.getDefault().getValue(perms.isOp()) ? 1 : 0;
+                return Objects.equals(perm.getDefault(), "op") ? 1 : 0;
             } else {
                 return 0;
             }

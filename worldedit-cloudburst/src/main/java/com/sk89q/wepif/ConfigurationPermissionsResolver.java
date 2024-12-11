@@ -21,7 +21,7 @@ package com.sk89q.wepif;
 
 import com.sk89q.util.yaml.YAMLNode;
 import com.sk89q.util.yaml.YAMLProcessor;
-import org.bukkit.OfflinePlayer;
+import cn.nukkit.OfflinePlayer;
 
 import java.util.HashMap;
 import java.util.HashSet;

@@ -32,17 +32,14 @@ import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
 import cn.nukkit.block.Block;
-import org.bukkit.event.Event.Result;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import cn.nukkit.event.server.ServerCommandEvent;
 import cn.nukkit.event.player.PlayerGameModeChangeEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.inject.InjectedValueStore;
 import org.enginehub.piston.inject.Key;
@@ -114,17 +111,17 @@ public class WorldEditListener implements Listener {
         InjectedValueStore store = MapBackedValueStore.create();
         store.injectValue(Key.of(Actor.class), context ->
                 Optional.of(plugin.wrapCommandSender(event.getSender())));
-        CommandManager commandManager = plugin
-                .getWorldEdit()
-                .getPlatformManager()
-                .getPlatformCommandManager()
-                .getCommandManager();
-        event.getCommands().removeIf(name ->
-                // remove if in the manager and not satisfied
-                commandManager.getCommand(name)
-                        .filter(command -> !command.getCondition().satisfied(store))
-                        .isPresent()
-        );
+//        CommandManager commandManager = plugin
+//                .getWorldEdit()
+//                .getPlatformManager()
+//                .getPlatformCommandManager()
+//                .getCommandManager();
+//        event.getCommands().removeIf(name ->
+//                // remove if in the manager and not satisfied
+//                commandManager.getCommand(name)
+//                        .filter(command -> !command.getCondition().satisfied(store))
+//                        .isPresent()
+//        );
     }
 
     /**
@@ -135,15 +132,14 @@ public class WorldEditListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (!plugin.getInternalPlatform().isHookingEvents()
-                || event.useItemInHand() == Result.DENY
-                || event.getHand() == EquipmentSlot.OFF_HAND
-                || event.getAction() == Action.PHYSICAL) {
+                || event.isCancelled()
+                || event.getAction() == PlayerInteractEvent.Action.PHYSICAL) {
             return;
         }
 
         final Player player = plugin.wrapPlayer(event.getPlayer());
 
-        if (event.getAction() != Action.LEFT_CLICK_BLOCK) {
+        if (event.getAction() != PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) {
             Optional<Boolean> previousResult = debouncer.getDuplicateInteractionResult(player);
             if (previousResult.isPresent()) {
                 if (previousResult.get()) {
@@ -155,8 +151,8 @@ public class WorldEditListener implements Listener {
 
         final World world = player.getWorld();
         final WorldEdit we = plugin.getWorldEdit();
-        final Direction direction = BukkitAdapter.adapt(event.getBlockFace());
-        final Block clickedBlock = event.getClickedBlock();
+        final Direction direction = BukkitAdapter.adapt(event.getFace());
+        final Block clickedBlock = event.getBlock();
         final Location pos = clickedBlock == null ? null : new Location(world, clickedBlock.getX(), clickedBlock.getY(), clickedBlock.getZ());
 
         boolean result = false;

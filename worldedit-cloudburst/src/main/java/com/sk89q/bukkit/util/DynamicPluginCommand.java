@@ -22,21 +22,19 @@ package com.sk89q.bukkit.util;
 import com.sk89q.minecraft.util.commands.CommandsManager;
 import com.sk89q.util.StringUtil;
 import com.sk89q.wepif.PermissionsResolverManager;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginIdentifiableCommand;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.plugin.Plugin;
+import cn.nukkit.OfflinePlayer;
+import cn.nukkit.command.CommandExecutor;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.PluginIdentifiableCommand;
+import cn.nukkit.command.Command;
+import cn.nukkit.plugin.Plugin;
 
-import java.util.Arrays;
-import java.util.List;
 
 /**
- * An implementation of a dynamically registered {@link org.bukkit.command.Command} attached to a plugin.
+ * An implementation of a dynamically registered {@link cn.nukkit.command.Command} attached to a plugin.
  */
 @SuppressWarnings("deprecation")
-public class DynamicPluginCommand extends org.bukkit.command.Command implements PluginIdentifiableCommand {
+public class DynamicPluginCommand extends Command implements PluginIdentifiableCommand {
 
     protected final CommandExecutor owner;
     protected final Object registeredWith;
@@ -51,7 +49,7 @@ public class DynamicPluginCommand extends org.bukkit.command.Command implements 
             Object registeredWith,
             Plugin plugin
     ) {
-        super(aliases[0], desc, usage, Arrays.asList(aliases));
+        super(aliases[0], desc, usage, aliases);
         this.owner = owner;
         this.owningPlugin = plugin;
         this.registeredWith = registeredWith;
@@ -86,14 +84,14 @@ public class DynamicPluginCommand extends org.bukkit.command.Command implements 
         return owningPlugin;
     }
 
-    @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-        if (registeredWith instanceof CommandInspector) {
-            return ((TabCompleter) owner).onTabComplete(sender, this, alias, args);
-        } else {
-            return super.tabComplete(sender, alias, args);
-        }
-    }
+//    @Override
+//    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+//        if (registeredWith instanceof CommandInspector) {
+//            return ((TabCompleter) owner).onTabComplete(sender, this, alias, args);
+//        } else {
+//            return super.tabComplete(sender, alias, args);
+//        }
+//    }
 
     @SuppressWarnings("unchecked")
     @Override

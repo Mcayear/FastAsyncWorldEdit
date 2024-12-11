@@ -4,22 +4,22 @@ import com.fastasyncworldedit.core.util.TaskManager;
 import com.fastasyncworldedit.core.util.image.Drawable;
 import com.fastasyncworldedit.core.util.image.ImageUtil;
 import com.fastasyncworldedit.core.util.image.ImageViewer;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Rotation;
-import org.bukkit.World;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.inventivetalent.mapmanager.MapManagerPlugin;
-import org.inventivetalent.mapmanager.controller.MapController;
-import org.inventivetalent.mapmanager.controller.MultiMapController;
-import org.inventivetalent.mapmanager.manager.MapManager;
-import org.inventivetalent.mapmanager.wrapper.MapWrapper;
+import cn.nukkit.item.ItemEmptyMap;
+import cn.nukkit.item.ItemMap;
+import cn.nukkit.level.Location;
+import cn.nukkit.level.generator.math.Rotation;
+import cn.nukkit.level.Level;
+import cn.nukkit.math.BlockFace;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.blockentity.BlockEntityItemFrame;
+import cn.nukkit.Player;
+import cn.nukkit.item.Item;
+import cn.nukkit.inventory.PlayerInventory;
+//import org.inventivetalent.mapmanager.MapManagerPlugin;
+//import org.inventivetalent.mapmanager.controller.MapController;
+//import org.inventivetalent.mapmanager.controller.MultiMapController;
+//import org.inventivetalent.mapmanager.manager.MapManager;
+//import org.inventivetalent.mapmanager.wrapper.MapWrapper;
 
 import javax.annotation.Nullable;
 import java.awt.RenderingHints;
@@ -29,27 +29,27 @@ import java.util.Collection;
 
 public class BukkitImageViewer implements ImageViewer {
 
-    private final MapManager mapManager;
+//    private final MapManager mapManager;
     private final Player player;
     private BufferedImage last;
-    private ItemFrame[][] frames;
+    private BlockEntityItemFrame[][] frames;
     private boolean reverse;
 
     public BukkitImageViewer(Player player) {
-        mapManager = ((MapManagerPlugin) Bukkit.getPluginManager().getPlugin("MapManager")).getMapManager();
+//        mapManager = ((MapManagerPlugin) Bukkit.getPluginManager().getPlugin("MapManager")).getMapManager();
         this.player = player;
     }
 
-    public void selectFrame(ItemFrame start) {
+    public void selectFrame(BlockEntityItemFrame start) {
         Location pos1 = start.getLocation().clone();
         Location pos2 = start.getLocation().clone();
 
-        BlockFace facing = start.getFacing();
-        int planeX = facing.getModX() == 0 ? 1 : 0;
-        int planeY = facing.getModY() == 0 ? 1 : 0;
-        int planeZ = facing.getModZ() == 0 ? 1 : 0;
+        BlockFace facing = start.createSpawnPacket().getBlockFace();
+        int planeX = facing.getXOffset() == 0 ? 1 : 0;
+        int planeY = facing.getYOffset() == 0 ? 1 : 0;
+        int planeZ = facing.getZOffset() == 0 ? 1 : 0;
 
-        ItemFrame[][] res = find(pos1, pos2, facing);
+        BlockEntityItemFrame[][] res = find(pos1, pos2, facing);
         Location tmp;
         while (true) {
             if (res != null) {
@@ -89,17 +89,17 @@ public class BukkitImageViewer implements ImageViewer {
         }
     }
 
-    public ItemFrame[][] getItemFrames() {
+    public BlockEntityItemFrame[][] getItemFrames() {
         return frames;
     }
 
-    private ItemFrame[][] find(Location pos1, Location pos2, BlockFace facing) {
+    private BlockEntityItemFrame[][] find(Location pos1, Location pos2, BlockFace facing) {
         try {
             Location distance = pos2.clone().subtract(pos1).add(1, 1, 1);
-            int width = Math.max(distance.getBlockX(), distance.getBlockZ());
-            ItemFrame[][] frames = new ItemFrame[width][distance.getBlockY()];
+            int width = Math.max(distance.getFloorX(), distance.getFloorZ());
+            BlockEntityItemFrame[][] frames = new BlockEntityItemFrame[width][distance.getFloorY()];
 
-            World world = pos1.getWorld();
+            Level world = pos1.getLevel();
 
             this.reverse = facing == BlockFace.NORTH || facing == BlockFace.EAST;
             int v = 0;
@@ -107,18 +107,18 @@ public class BukkitImageViewer implements ImageViewer {
                 int h = 0;
                 for (double z = pos1.getZ(); z <= pos2.getZ(); z++) {
                     for (double x = pos1.getX(); x <= pos2.getX(); x++, h++) {
-                        Location pos = new Location(world, x, y, z);
-                        Collection<Entity> entities = world.getNearbyEntities(pos, 0.1, 0.1, 0.1);
+//                        Location pos = new Location(x, y, z, world);
+//                        Entity[] entities = world.getNearbyEntities(player.boundingBox.grow(0.1, 0.1, 0.1), player);
                         boolean contains = false;
-                        for (Entity ent : entities) {
-                            if (ent instanceof ItemFrame && ent.getFacing() == facing) {
-                                ItemFrame itemFrame = (ItemFrame) ent;
-                                itemFrame.setRotation(Rotation.NONE);
-                                contains = true;
-                                frames[reverse ? width - 1 - h : h][v] = (ItemFrame) ent;
-                                break;
-                            }
-                        }
+//                        for (Entity ent : entities) {
+//                            if (ent instanceof BlockEntityItemFrame && ent.getFacing() == facing) {
+//                                BlockEntityItemFrame itemFrame = (BlockEntityItemFrame) ent;
+//                                itemFrame.setRotation(Rotation.NONE);
+//                                contains = true;
+//                                frames[reverse ? width - 1 - h : h][v] = (BlockEntityItemFrame) ent;
+//                                break;
+//                            }
+//                        }
                         if (!contains) {
                             return null;
                         }
@@ -144,7 +144,7 @@ public class BukkitImageViewer implements ImageViewer {
         boolean initializing = last == null;
 
         if (this.frames != null) {
-            if (image == null && drawable != null) {
+            if (image == null) {
                 image = drawable.draw();
             }
             last = image;
@@ -157,17 +157,17 @@ public class BukkitImageViewer implements ImageViewer {
                     RenderingHints.VALUE_INTERPOLATION_BILINEAR,
                     false
             );
-            MapWrapper mapWrapper = mapManager.wrapMultiImage(scaled, width, height);
-            MultiMapController controller = (MultiMapController) mapWrapper.getController();
-            controller.addViewer(player);
-            controller.sendContent(player);
-            controller.showInFrames(player, frames, true);
+//            MapWrapper mapWrapper = mapManager.wrapMultiImage(scaled, width, height);
+//            MultiMapController controller = (MultiMapController) mapWrapper.getController();
+//            controller.addViewer(player);
+//            controller.sendContent(player);
+//            controller.showInFrames(player, frames, true);
         } else {
             int slot = getMapSlot(player);
             TaskManager.taskManager().sync(() -> {
                 if (slot == -1) {
                     if (initializing) {
-                        player.getInventory().setItemInMainHand(new ItemStack(Material.MAP));
+                        player.getInventory().setItemInHand(Item.fromString("minecraft:map"));
                     } else {
                         return null;
                     }
@@ -187,19 +187,19 @@ public class BukkitImageViewer implements ImageViewer {
                     RenderingHints.VALUE_INTERPOLATION_BILINEAR,
                     false
             );
-            MapWrapper mapWrapper = mapManager.wrapImage(scaled);
-            MapController controller = mapWrapper.getController();
-            controller.addViewer(player);
-            controller.sendContent(player);
-            controller.showInHand(player, true);
+//            MapWrapper mapWrapper = mapManager.wrapImage(scaled);
+//            MapController controller = mapWrapper.getController();
+//            controller.addViewer(player);
+//            controller.sendContent(player);
+//            controller.showInHand(player, true);
         }
     }
 
     private int getMapSlot(Player player) {
         PlayerInventory inventory = player.getInventory();
         for (int i = 0; i < 9; i++) {
-            ItemStack item = inventory.getItem(i);
-            if (item != null && item.getType() == Material.MAP) {
+            Item item = inventory.getItem(i);
+            if (!item.isNull() && (item instanceof ItemEmptyMap || item instanceof ItemMap)) {
                 return i;
             }
         }

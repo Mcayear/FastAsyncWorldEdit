@@ -19,15 +19,16 @@
 
 package com.sk89q.bukkit.util;
 
+import com.google.common.collect.Sets;
 import com.sk89q.util.ReflectionUtil;
-import io.papermc.lib.PaperLib;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandMap;
-import org.bukkit.command.PluginIdentifiableCommand;
-import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.plugin.Plugin;
+import cn.nukkit.Server;
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandExecutor;
+import cn.nukkit.command.CommandMap;
+import cn.nukkit.command.PluginIdentifiableCommand;
+import cn.nukkit.command.SimpleCommandMap;
+import cn.nukkit.plugin.Plugin;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,12 +38,12 @@ import java.util.Set;
 
 public class CommandRegistration {
 
-    static {
-        Bukkit.getServer().getHelpMap().registerHelpTopicFactory(
-                DynamicPluginCommand.class,
-                new DynamicPluginCommandHelpTopic.Factory()
-        );
-    }
+//    static {
+//        Bukkit.getServer().getHelpMap().registerHelpTopicFactory(
+//                DynamicPluginCommand.class,
+//                new DynamicPluginCommandHelpTopic.Factory()
+//        );
+//    }
 
     protected final Plugin plugin;
     protected final CommandExecutor executor;
@@ -97,9 +98,9 @@ public class CommandRegistration {
             return fallbackCommands;
         }
 
-        CommandMap commandMap = PaperLib.isPaper() ? Bukkit.getCommandMap() : ReflectionUtil.getField(plugin.getServer().getPluginManager(), "commandMap");
+        CommandMap commandMap = ReflectionUtil.getField(plugin.getServer().getPluginManager(), "commandMap");
         if (commandMap == null) {
-            Bukkit.getServer().getLogger().severe(plugin.getDescription().getName()
+            WorldEditPlugin.getInstance().getServer().getLogger().error(plugin.getDescription().getName()
                     + ": Could not retrieve server CommandMap");
             throw new IllegalStateException("Failed to retrieve command map, make sure you are running supported server software");
         } else {
@@ -111,19 +112,21 @@ public class CommandRegistration {
     public boolean unregisterCommands() {
         CommandMap commandMap = getCommandMap();
         List<String> toRemove = new ArrayList<>();
-        Map<String, org.bukkit.command.Command> knownCommands = ReflectionUtil.getField(commandMap, "knownCommands");
+        Map<String, Command> knownCommands = ReflectionUtil.getField(commandMap, "knownCommands");
         Set<String> aliases = ReflectionUtil.getField(commandMap, "aliases");
         if (knownCommands == null || aliases == null) {
             return false;
         }
-        for (Iterator<org.bukkit.command.Command> i = knownCommands.values().iterator(); i.hasNext(); ) {
-            org.bukkit.command.Command cmd = i.next();
+        for (Iterator<Command> i = knownCommands.values().iterator(); i.hasNext(); ) {
+            Command cmd = i.next();
             if (cmd instanceof DynamicPluginCommand && ((DynamicPluginCommand) cmd).getOwner().equals(executor)) {
                 i.remove();
                 for (String alias : cmd.getAliases()) {
-                    org.bukkit.command.Command aliasCmd = knownCommands.get(alias);
+                    Command aliasCmd = knownCommands.get(alias);
                     if (cmd.equals(aliasCmd)) {
-                        aliases.remove(alias);
+                        var set = Sets.newHashSet(cmd.getAliases());
+                        set.remove(alias);
+                        cmd.setAliases(set.toArray(new String[]{}));
                         toRemove.add(alias);
                     }
                 }

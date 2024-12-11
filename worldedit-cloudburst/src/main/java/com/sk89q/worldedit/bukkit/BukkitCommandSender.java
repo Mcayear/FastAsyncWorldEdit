@@ -25,10 +25,9 @@ import com.sk89q.worldedit.session.SessionKey;
 import com.sk89q.worldedit.util.auth.AuthorizationException;
 import com.sk89q.worldedit.util.formatting.WorldEditText;
 import com.sk89q.worldedit.util.formatting.text.Component;
-import com.sk89q.worldedit.util.formatting.text.adapter.bukkit.TextAdapter;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.Player;
 
 import javax.annotation.Nullable;
 import java.util.Locale;
@@ -100,7 +99,7 @@ public class BukkitCommandSender extends AbstractNonPlayerActor {
 
     @Override
     public void print(Component component) {
-        TextAdapter.sendMessage(sender, WorldEditText.format(component, getLocale()));
+        sender.sendMessage(WorldEditText.format(component, getLocale()).toString());
     }
 
     @Override
@@ -146,7 +145,7 @@ public class BukkitCommandSender extends AbstractNonPlayerActor {
                 //FAWE start - check if sender instanceof Entity, before returning true
                 if (sender instanceof Entity) {
                     Entity entity = (Entity) sender;
-                    return entity.isValid() && !entity.isDead();
+                    return entity.isValid() && entity.isAlive();
                 }
                 //FAWE end
                 return true;

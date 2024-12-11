@@ -4,8 +4,8 @@ import com.fastasyncworldedit.bukkit.adapter.NMSAdapter;
 import com.fastasyncworldedit.bukkit.util.WorldUnloadedException;
 import com.fastasyncworldedit.core.math.IntPair;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
+import cn.nukkit.Server;
+import cn.nukkit.level.Level;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FaweBukkitWorld extends BukkitWorld {
 
-    private static final Map<World, FaweBukkitWorld> CACHE = Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<Level, FaweBukkitWorld> CACHE = Collections.synchronizedMap(new WeakHashMap<>());
 
     private final ConcurrentHashMap<IntPair, NMSAdapter.ChunkSendLock> SENDING_CHUNKS = new ConcurrentHashMap<>();
 
@@ -24,11 +24,11 @@ public class FaweBukkitWorld extends BukkitWorld {
      *
      * @param world the world
      */
-    private FaweBukkitWorld(final World world) {
+    private FaweBukkitWorld(final Level world) {
         super(world);
     }
 
-    public static FaweBukkitWorld of(World world) {
+    public static FaweBukkitWorld of(Level world) {
         return CACHE.compute(world, (__, val) -> {
             if (val == null) {
                 return new FaweBukkitWorld(world);
@@ -39,7 +39,7 @@ public class FaweBukkitWorld extends BukkitWorld {
     }
 
     public static FaweBukkitWorld of(String worldName) {
-        World world = Bukkit.getWorld(worldName);
+        Level world = Server.getInstance().getLevelByName(worldName);
         if (world == null) {
             throw new UnsupportedOperationException("Unable to find org.bukkit.World instance for " + worldName + ". Is it loaded?");
         }
@@ -55,8 +55,8 @@ public class FaweBukkitWorld extends BukkitWorld {
     }
 
     private void updateReference() {
-        World world = getWorld();
-        World bukkitWorld = Bukkit.getWorld(worldNameRef);
+        Level world = getWorld();
+        Level bukkitWorld = Server.getInstance().getLevelByName(worldNameRef);
         if (bukkitWorld == null) {
             throw new WorldUnloadedException(worldNameRef);
         } else if (bukkitWorld != world) {

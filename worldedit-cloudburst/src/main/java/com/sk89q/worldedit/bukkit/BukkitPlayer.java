@@ -24,12 +24,11 @@ import cn.nukkit.Server;
 import com.fastasyncworldedit.core.configuration.Caption;
 import com.fastasyncworldedit.core.configuration.Settings;
 import com.fastasyncworldedit.core.util.TaskManager;
+import com.google.common.collect.Sets;
 import com.sk89q.util.StringUtil;
-import com.sk89q.wepif.VaultResolver;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseItemStack;
-import com.sk89q.worldedit.bukkit.adapter.BukkitImplAdapter;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.extension.platform.AbstractPlayerActor;
 import com.sk89q.worldedit.extent.Extent;
@@ -50,7 +49,6 @@ import com.sk89q.worldedit.util.formatting.text.format.TextColor;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
-import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldedit.world.gamemode.GameMode;
 import com.sk89q.worldedit.world.gamemode.GameModes;
 //import org.bukkit.Bukkit;
@@ -61,12 +59,9 @@ import cn.nukkit.event.player.PlayerDropItemEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.inventory.PlayerInventory;
 import cn.nukkit.permission.PermissionAttachment;
-import org.enginehub.linbus.tree.LinCompoundTag;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -168,21 +163,19 @@ public class BukkitPlayer extends AbstractPlayerActor {
             }
             final Item item = player.getInventory().getItemInHand();
             player.getInventory().setItemInHand(newItem);
-            Item[] overflow = inv.addItem(item);
-            if (overflow.length != 0) {
-                for (Map.Entry<Integer, Item> entry : overflow.entrySet()) {
-                    ItemStack stack = entry.getValue();
-                    if (stack.getType() != Material.AIR && stack.getAmount() > 0) {
-                        Item dropped = player.getWorld().dropItem(player.getLocation(), stack);
-                        PlayerDropItemEvent event = new PlayerDropItemEvent(player, dropped);
-                        Server.getInstance().getPluginManager().callEvent(event);
-                        if (event.isCancelled()) {
-                            dropped.remove();
-                        }
-                    }
+            if (inv.canAddItem(item)) {
+                inv.addItem(item);
+            } else {
+                PlayerDropItemEvent event = new PlayerDropItemEvent(player, newItem);
+                Server.getInstance().getPluginManager().callEvent(event);
+                if (event.isCancelled()) {
+                    return null;
                 }
+                player.getLevel().dropItem(player.getLocation(), newItem);
             }
-            player.updateInventory();
+            var sets = Sets.newHashSet(player.getViewers().values());
+            sets.add(player);
+            inv.sendContents(sets);
             return null;
         });
     }
@@ -254,7 +247,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
 
     @Override
     public String[] getGroups() {
-        return plugin.getPermissionsResolver().getGroups(player);
+        return plugin.getPermissionsResolver().getGroups(player.getName());
     }
 
     @Override
@@ -293,25 +286,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
     //FAWE start
     @Override
     public void setPermission(String permission, boolean value) {
-        /*
-         *  Permissions are used to managing WorldEdit region restrictions
-         *   - The `/wea` command will give/remove the required bypass permission
-         */
-        boolean usesuperperms = VaultResolver.perms == null;
-        if (VaultResolver.perms != null) {
-            if (value) {
-                if (!VaultResolver.perms.playerAdd(player, permission)) {
-                    usesuperperms = true;
-                }
-            } else {
-                if (!VaultResolver.perms.playerRemove(player, permission)) {
-                    usesuperperms = true;
-                }
-            }
-        }
-        if (usesuperperms) {
-            permAttachment.setPermission(permission, value);
-        }
+        permAttachment.setPermission(permission, value);
     }
     //FAWE end
 
@@ -327,7 +302,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
         if (params.length > 0) {
             send = send + "|" + StringUtil.joinString(params, "|");
         }
-        player.sendPluginMessage(plugin, WorldEditPlugin.CUI_PLUGIN_CHANNEL, send.getBytes(StandardCharsets.UTF_8));
+        player.sendMessage(send);
     }
 
     public Player getPlayer() {
@@ -423,7 +398,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
             // CopyOnWrite list for the list of players, but the Bukkit
             // specification doesn't require thread safety (though the
             // spec is extremely incomplete)
-            return Bukkit.getServer().getPlayer(uuid) != null;
+            return Server.getInstance().getPlayer(uuid).isPresent();
         }
 
         @Override
@@ -433,24 +408,29 @@ public class BukkitPlayer extends AbstractPlayerActor {
 
     }
 
+//    private transient FakeStructBlock cuiBlock;
+
     @Override
     public <B extends BlockStateHolder<B>> void sendFakeBlock(BlockVector3 pos, B block) {
-        Location loc = new Location(pos.x(), pos.y(), pos.z(), player.getLevel());
-        if (block == null) {
-            player.getLevel().sendBlocks(player, new cn.nukkit.block.Block[]{player.getLevel().getBlock(loc)}, 0);
-        } else {
-            player.getLevel().sendBlocks(player, new cn.nukkit.block.Block[]{BukkitAdapter.adapt(block)}, 0);
-            BukkitImplAdapter adapter = WorldEditPlugin.getInstance().getBukkitImplAdapter();
-            if (adapter != null) {
-                if (block.getBlockType() == BlockTypes.STRUCTURE_BLOCK && block instanceof BaseBlock) {
-                    LinCompoundTag nbt = ((BaseBlock) block).getNbt();
-                    if (nbt != null) {
-                        adapter.sendFakeNBT(player, pos, nbt);
-                        adapter.sendFakeOP(player);
-                    }
-                }
-            }
-        }
+//        if (block != null) {
+//            if (cuiBlock != null) {
+//                cuiBlock.remove(this.player);
+//            }
+//            cn.nukkit.math.BlockVector3 start = new cn.nukkit.math.BlockVector3(
+//                    block.getNbt().getInt("x"),
+//                    block.getNbt().getInt("y"),
+//                    block.getNbt().getInt("z")
+//            );
+//            cn.nukkit.math.BlockVector3 end = new cn.nukkit.math.BlockVector3(
+//                    block.getNbt().getInt("posX"),
+//                    block.getNbt().getInt("posY"),
+//                    block.getNbt().getInt("posZ")
+//            );
+//            cuiBlock = new FakeStructBlock();
+//            cuiBlock.create(start, end, this.player);
+//        } else if (cuiBlock != null) {
+//            cuiBlock.remove(this.player);
+//        }
     }
 
     //FAWE start
