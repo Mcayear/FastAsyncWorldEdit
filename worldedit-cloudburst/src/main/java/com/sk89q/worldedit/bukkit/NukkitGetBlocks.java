@@ -1,13 +1,14 @@
 package com.sk89q.worldedit.bukkit;
 
 import cn.nukkit.block.BlockAir;
+import cn.nukkit.block.BlockID;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.biome.EnumBiome;
+import cn.nukkit.level.format.Chunk;
 import cn.nukkit.level.format.ChunkSection;
-import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.anvil.palette.BiomePalette;
 //import cn.nukkit.level.format.palette.Palette;
 import com.fastasyncworldedit.bukkit.util.ItemUtil;
@@ -15,6 +16,7 @@ import com.fastasyncworldedit.core.Fawe;
 import com.fastasyncworldedit.core.FaweCache;
 import com.fastasyncworldedit.core.configuration.Settings;
 import com.fastasyncworldedit.core.extent.processor.heightmap.HeightMapType;
+import com.fastasyncworldedit.core.nbt.FaweCompoundTag;
 import com.fastasyncworldedit.core.queue.IChunkGet;
 import com.fastasyncworldedit.core.queue.IChunkSet;
 import com.fastasyncworldedit.core.queue.implementation.QueueHandler;
@@ -34,6 +36,7 @@ import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldedit.world.block.BlockTypesCache;
 import com.sk89q.worldedit.world.entity.EntityType;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,7 +64,7 @@ public class NukkitGetBlocks extends CharGetBlocks {
     private boolean forceLoadSections = true;
     private boolean lightUpdate = false;
     private ChunkSection[] nukkitChunkSections;
-    private BaseFullChunk nukkitChunk;
+    private Chunk nukkitChunk;
 
     public NukkitGetBlocks(Level serverLevel, int chunkX, int chunkZ) {
         super(serverLevel.getDimensionData().getMinSectionY(), serverLevel.getDimensionData().getMaxSectionY());
@@ -71,11 +74,10 @@ public class NukkitGetBlocks extends CharGetBlocks {
         this.minHeight = serverLevel.getMinBlockY();
         this.maxHeight = serverLevel.getMaxBlockY();
 
-        BaseFullChunk chunk = serverLevel.getChunk(chunkX, chunkZ);
+        Chunk chunk = (Chunk) serverLevel.getChunk(chunkX, chunkZ);
         if (chunk == null) {
-            chunk = serverLevel.getChunk(chunkX, chunkZ, true);
+            chunk = (Chunk) serverLevel.getChunk(chunkX, chunkZ, true);
         }
-
         this.nukkitChunk = chunk;
         this.nukkitChunkSections = this.nukkitChunk.getSections();
     }
@@ -174,37 +176,38 @@ public class NukkitGetBlocks extends CharGetBlocks {
         layer -= getMinSectionPosition();
         if (this.nukkitChunkSections[layer] != null && !(this.nukkitChunkSections[layer].isEmpty())) {
             lightUpdate = true;
+            for (int x = 0; x < 16; x++) {
+                for (int y = 0; y < 16; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        this.nukkitChunkSections[layer].setBlockLight(x, y, z, (byte) 0);
+                    }
+                }
+            }
+            if (sky) {
                 for (int x = 0; x < 16; x++) {
                     for (int y = 0; y < 16; y++) {
                         for (int z = 0; z < 16; z++) {
-                            this.nukkitChunkSections[layer].setBlockLight(x, y, z, (byte) 0);
+                            this.nukkitChunkSections[layer].setBlockSkyLight(x, y, z, (byte) 0);
                         }
                     }
                 }
-            if (sky) {
-                    for (int x = 0; x < 16; x++) {
-                        for (int y = 0; y < 16; y++) {
-                            for (int z = 0; z < 16; z++) {
-                                this.nukkitChunkSections[layer].setBlockSkyLight(x, y, z, (byte) 0);
-                            }
-                        }
-                    }
             }
         }
     }
 
+    @Nullable
     @Override
-    public CompoundTag getTile(int x, int y, int z) {
-        return ItemUtil.toJNBT(this.nukkitChunk.getTile(x & 15, y, z & 15).namedTag);
+    public FaweCompoundTag tile(final int x, final int y, final int z) {
+        return ItemUtil.toFaweNBT(this.nukkitChunk.getTile(x & 15, y, z & 15).namedTag);
     }
 
     @Override
-    public Map<BlockVector3, CompoundTag> getTiles() {
-        var map = new HashMap<BlockVector3, CompoundTag>();
+    public Map<BlockVector3, FaweCompoundTag> tiles() {
+        var map = new HashMap<BlockVector3, FaweCompoundTag>();
         this.nukkitChunk.getBlockEntities().values()
                 .forEach(entity -> map.put(
                         BlockVector3.at(entity.getFloorX(), entity.getFloorY(), entity.getFloorZ()),
-                        ItemUtil.toJNBT(entity.namedTag)
+                        ItemUtil.toFaweNBT(entity.namedTag)
                 ));
         return map;
     }
@@ -247,8 +250,8 @@ public class NukkitGetBlocks extends CharGetBlocks {
         entity.kill();
     }
 
-    public BaseFullChunk ensureLoaded(Level nmsWorld, int chunkX, int chunkZ) {
-        return nmsWorld.getChunkIfLoaded(chunkX, chunkZ);
+    public Chunk ensureLoaded(Level nmsWorld, int chunkX, int chunkZ) {
+        return (Chunk) nmsWorld.getChunkIfLoaded(chunkX, chunkZ);
     }
 
     private void setChunkBlocks(final IChunkSet set) {
@@ -282,7 +285,7 @@ public class NukkitGetBlocks extends CharGetBlocks {
                     if (combined.getBlockType() == BlockTypes.AIR ||
                             combined.getBlockType() == BlockTypes.CAVE_AIR ||
                             combined.getBlockType() == BlockTypes.VOID_AIR) {
-                        nukkitChunk.setBlockState(x, y, z, BlockAir.STATE);
+                        nukkitChunk.setBlockId(x, y, z, BlockID.AIR);
                     } else {
                         nukkitChunk.setBlockState(x, y, z, BukkitAdapter.adapt(combined));
                     }
@@ -295,10 +298,10 @@ public class NukkitGetBlocks extends CharGetBlocks {
     @SuppressWarnings("rawtypes")
     public synchronized <T extends Future<T>> T call(IChunkSet set, Runnable finalizer) {
         forceLoadSections = false;
-        copy = createCopy ? new PNXGetBlocks_Copy(serverLevel, nukkitChunk) : null;
+        copy = createCopy ? new NukkitGetBlocks_Copy(serverLevel, nukkitChunk) : null;
         try {
             Level nmsWorld = serverLevel;
-            BaseFullChunk nmsChunk = ensureLoaded(nmsWorld, chunkX, chunkZ);
+            Chunk nmsChunk = ensureLoaded(nmsWorld, chunkX, chunkZ);
             // Remove existing tiles. Create a copy so that we can remove blocks
             Map<Long, BlockEntity> chunkTiles = new HashMap<>(nmsChunk.getBlockEntities());
             if (!chunkTiles.isEmpty()) {
@@ -613,7 +616,7 @@ public class NukkitGetBlocks extends CharGetBlocks {
                         continue;
                     }
                     for (int i = 0; i < 4; i++) {
-                        newSection.setBiomeId(
+                        newSection.setBiome(
                                 x * 4 + i,
                                 y * 4 + i,
                                 z * 4 + i,
@@ -674,8 +677,8 @@ public class NukkitGetBlocks extends CharGetBlocks {
         for (int y = 0, index = 0; y < 16; y++) {
             for (int z = 0; z < 16; z++) {
                 for (int x = 0; x < 16; x++, index++) {
-                    var state = section.getBlockState(x, y, z);
-                    if (state == BlockAir.STATE) {
+                    var state = section.getBlockId(x, y, z);
+                    if (state == BlockID.AIR) {
                         data[index] = 0;
                     } else {
                         data[index] = BukkitAdapter.adapt(section.getBlockState(x, y, z)).getOrdinalChar();
@@ -687,7 +690,7 @@ public class NukkitGetBlocks extends CharGetBlocks {
     }
 
     private void updateGet(
-            BaseFullChunk nmsChunk,
+            Chunk nmsChunk,
             ChunkSection[] chunkSections,
             ChunkSection section,
             char[] arr,
@@ -737,8 +740,8 @@ public class NukkitGetBlocks extends CharGetBlocks {
         return tmp;
     }
 
-    public BaseFullChunk getChunk() {
-        BaseFullChunk levelChunk = this.nukkitChunk;
+    public Chunk getChunk() {
+        Chunk levelChunk = this.nukkitChunk;
         if (levelChunk == null) {
             synchronized (this) {
                 levelChunk = this.nukkitChunk;

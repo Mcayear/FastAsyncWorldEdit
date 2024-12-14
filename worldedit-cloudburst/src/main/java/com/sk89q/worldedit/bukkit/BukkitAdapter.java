@@ -349,7 +349,7 @@ public enum BukkitAdapter {
      * @param blockType The WorldEdit BlockType
      * @return The Bukkit Material
      */
-    public static Material adapt(BlockType blockType) {
+    public static cn.nukkit.level.generator.block.state.BlockState adapt(BlockType blockType) {
         //FAWE start - logic moved to IBukkitAdapter
         return getAdapter().adapt(blockType);
         //FAWE end
@@ -391,15 +391,20 @@ public enum BukkitAdapter {
      * @param entityType Bukkit EntityType
      * @return WorldEdit EntityType
      */
-    public static EntityType adapt(String entityType) {
+    public static EntityType adaptEntity(String entityType) {
         //FAWE start - logic moved to IBukkitAdapter
-        return getAdapter().adapt(entityType);
+        return getAdapter().adaptEntity(entityType);
         //FAWE end
     }
+//    public static EntityType adapt(String entityType) {
+//        //FAWE start - logic moved to IBukkitAdapter
+//        return getAdapter().adapt(entityType);
+//        //FAWE end
+//    }
 
-    public static org.bukkit.entity.EntityType adapt(EntityType entityType) {
+    public static org.bukkit.entity.EntityType adaptEntity(EntityType entityType) {
         //FAWE start - logic moved to IBukkitAdapter
-        return getAdapter().adapt(entityType);
+        return getAdapter().adaptEntity(entityType);
         //FAWE end
     }
 

@@ -19,156 +19,170 @@
 
 package com.sk89q.worldedit.bukkit;
 
+import cn.nukkit.Player;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.blockentity.BlockEntityBanner;
+import cn.nukkit.blockentity.BlockEntityItemFrame;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.EntityHuman;
+import cn.nukkit.entity.EntityLiving;
+import cn.nukkit.entity.EntityOwnable;
+import cn.nukkit.entity.item.EntityArmorStand;
+import cn.nukkit.entity.item.EntityBoat;
+import cn.nukkit.entity.item.EntityFallingBlock;
+import cn.nukkit.entity.item.EntityItem;
+import cn.nukkit.entity.item.EntityMinecartAbstract;
+import cn.nukkit.entity.item.EntityPrimedTNT;
+import cn.nukkit.entity.item.EntityXPOrb;
+import cn.nukkit.entity.mob.EntityEnderDragon;
+import cn.nukkit.entity.mob.EntitySnowGolem;
+import cn.nukkit.entity.mob.EntityWither;
+import cn.nukkit.entity.passive.EntityAnimal;
+import cn.nukkit.entity.passive.EntityIronGolem;
+import cn.nukkit.entity.passive.EntityNPCEntity;
+import cn.nukkit.entity.passive.EntityVillager;
+import cn.nukkit.entity.passive.EntityWaterAnimal;
+import cn.nukkit.entity.projectile.EntityProjectile;
 import com.sk89q.worldedit.entity.metadata.EntityProperties;
-import org.bukkit.entity.AbstractVillager;
-import org.bukkit.entity.Ambient;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Boat;
-import org.bukkit.entity.ComplexEntityPart;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.Golem;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Minecart;
-import org.bukkit.entity.Painting;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.TNTPrimed;
-import org.bukkit.entity.Tameable;
-import org.bukkit.entity.Villager;
-import org.bukkit.entity.WaterMob;
-import org.bukkit.entity.minecart.ExplosiveMinecart;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 class BukkitEntityProperties implements EntityProperties {
 
-    private static final boolean HAS_ABSTRACT_VILLAGER;
-
-    static {
-        boolean temp;
-        try {
-            Class.forName("org.bukkit.entity.AbstractVillager");
-            temp = true;
-        } catch (ClassNotFoundException e) {
-            temp = false;
-        }
-        HAS_ABSTRACT_VILLAGER = temp;
-    }
-
-    private final Entity entity;
+    protected final Entity entity;
+    protected final BlockEntity blockEntity;
 
     BukkitEntityProperties(Entity entity) {
         checkNotNull(entity);
         this.entity = entity;
+        this.blockEntity = null;
     }
 
+    BukkitEntityProperties(BlockEntity entity) {
+        checkNotNull(entity);
+        this.entity = null;
+        this.blockEntity = entity;
+    }
     @Override
     public boolean isPlayerDerived() {
-        return entity instanceof HumanEntity;
+        if (entity == null) return false;
+        return entity instanceof EntityHuman;
     }
 
     @Override
     public boolean isProjectile() {
-        return entity instanceof Projectile;
+        if (entity == null) return false;
+        return entity instanceof EntityProjectile;
     }
 
     @Override
     public boolean isItem() {
-        return entity instanceof Item;
+        if (entity == null) return false;
+        return entity instanceof EntityItem;
     }
 
     @Override
     public boolean isFallingBlock() {
-        return entity instanceof FallingBlock;
+        if (entity == null) return false;
+        return entity instanceof EntityFallingBlock;
     }
 
     @Override
     public boolean isPainting() {
-        return entity instanceof Painting;
+        if (blockEntity == null) return false;
+        return blockEntity instanceof BlockEntityBanner;
     }
 
     @Override
     public boolean isItemFrame() {
-        return entity instanceof ItemFrame;
+        if (blockEntity == null) return false;
+        return blockEntity instanceof BlockEntityItemFrame;
     }
 
     @Override
     public boolean isBoat() {
-        return entity instanceof Boat;
+        if (entity == null) return false;
+        return entity instanceof EntityBoat;
     }
 
     @Override
     public boolean isMinecart() {
-        return entity instanceof Minecart;
+        if (entity == null) return false;
+        return entity instanceof EntityMinecartAbstract;
     }
 
     @Override
     public boolean isTNT() {
-        return entity instanceof TNTPrimed || entity instanceof ExplosiveMinecart;
+        if (entity == null) return false;
+        return entity instanceof EntityPrimedTNT;
     }
 
     @Override
     public boolean isExperienceOrb() {
-        return entity instanceof ExperienceOrb;
+        if (entity == null) return false;
+        return entity instanceof EntityXPOrb;
     }
 
     @Override
     public boolean isLiving() {
-        return entity instanceof LivingEntity;
+        if (entity == null) return false;
+        return entity instanceof EntityLiving;
     }
 
     @Override
     public boolean isAnimal() {
-        return entity instanceof Animals;
+        if (entity == null) return false;
+        return entity instanceof EntityAnimal;
     }
 
     @Override
     public boolean isAmbient() {
-        return entity instanceof Ambient;
+        if (entity == null) return false;
+        return entity instanceof EntityAnimal;
+//        return entity instanceof Ambient;
     }
 
     @Override
     public boolean isNPC() {
-        if (HAS_ABSTRACT_VILLAGER) {
-            return entity instanceof AbstractVillager;
-        }
-        return entity instanceof Villager;
+        if (entity == null) return false;
+        if (entity instanceof EntityNPCEntity) return true;
+        return entity instanceof EntityVillager;
     }
 
     @Override
     public boolean isGolem() {
-        return entity instanceof Golem;
+        if (entity == null) return false;
+        return entity instanceof EntityIronGolem || entity instanceof EntitySnowGolem;
     }
 
     @Override
     public boolean isTamed() {
-        return entity instanceof Tameable && ((Tameable) entity).isTamed();
+        if (entity == null) return false;
+        return entity instanceof EntityOwnable;
     }
 
     @Override
     public boolean isTagged() {
-        return entity instanceof LivingEntity && entity.getCustomName() != null;
+        if (entity == null) return false;
+        return entity instanceof EntityLiving && entity.hasCustomName();
     }
 
     @Override
     public boolean isArmorStand() {
-        return entity instanceof ArmorStand;
+        if (entity == null) return false;
+        return entity instanceof EntityArmorStand;
     }
 
     @Override
     public boolean isPasteable() {
-        return !(entity instanceof Player || entity instanceof ComplexEntityPart);
+        if (entity == null) return false;
+        return !(entity instanceof Player || entity instanceof EntityEnderDragon || entity instanceof EntityWither);
     }
 
     @Override
     public boolean isWaterCreature() {
-        return entity instanceof WaterMob;
+        if (entity == null) return false;
+        return entity instanceof EntityWaterAnimal;
     }
 
 }

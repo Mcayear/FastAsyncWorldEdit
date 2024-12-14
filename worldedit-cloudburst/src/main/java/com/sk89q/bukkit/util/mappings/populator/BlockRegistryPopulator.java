@@ -96,15 +96,15 @@ public final class BlockRegistryPopulator {
 
                 final CompoundTag remappedTag = mapper.remap(treeMapCompoundTag);
                 final int i = HashUtils.fnv1a_32_nbt(remappedTag);
-                cn.nukkit.block.BlockState pnxBlockState = Registries.BLOCKSTATE.get(i);
-                if (pnxBlockState == null && !experimentalBlocks.contains(remappedTag.getString("name"))) {
+                cn.nukkit.block.BlockState nkxBlockState = Registries.BLOCKSTATE.get(i);
+                if (nkxBlockState == null && !experimentalBlocks.contains(remappedTag.getString("name"))) {
                     PNXWorldEditPlugin
                             .getInstance()
                             .getLogger()
                             .error("cant find block state for %s".formatted(remappedTag.toSNBT()));
-                    pnxBlockState = BlockAir.STATE;
+                    nkxBlockState = BlockAir.STATE;
                 }
-                PNX2FAWE.put(pnxBlockState, BlockState.get(k));
+                PNX2FAWE.put(nkxBlockState, BlockState.get(k));
             });
             final cn.nukkit.block.BlockState i = BlockFlowingLava.PROPERTIES.getBlockState(CommonBlockProperties.LIQUID_DEPTH.createValue(
                     0));
@@ -338,15 +338,15 @@ public final class BlockRegistryPopulator {
 
                 final CompoundTag remappedTag = mapper.remap(treeMapCompoundTag);
                 final int i = HashUtils.fnv1a_32_nbt(remappedTag);
-                cn.nukkit.block.BlockState pnxBlockState = Registries.BLOCKSTATE.get(i);
-                if (pnxBlockState == null && !experimentalBlocks.contains(remappedTag.getString("name"))) {
+                cn.nukkit.block.BlockState nkxBlockState = Registries.BLOCKSTATE.get(i);
+                if (nkxBlockState == null && !experimentalBlocks.contains(remappedTag.getString("name"))) {
                     PNXWorldEditPlugin
                             .getInstance()
                             .getLogger()
                             .error("cant find block state for %s".formatted(remappedTag.toSNBT()));
-                    pnxBlockState = BlockAir.STATE;
+                    nkxBlockState = BlockAir.STATE;
                 }
-                FAWE2PNX.put(k, pnxBlockState);
+                FAWE2PNX.put(k, nkxBlockState);
             });
             final cn.nukkit.block.BlockState i = BlockFlowingLava.PROPERTIES.getBlockState(CommonBlockProperties.LIQUID_DEPTH.createValue(
                     0));

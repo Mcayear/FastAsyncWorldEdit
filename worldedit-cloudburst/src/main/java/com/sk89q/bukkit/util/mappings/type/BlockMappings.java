@@ -23,8 +23,8 @@ public class BlockMappings {
         }
     }
 
-    public com.sk89q.worldedit.world.block.BlockState getFAWEBlock(cn.nukkit.block.BlockState pnxBlockState) {
-        final com.sk89q.worldedit.world.block.BlockState faweBlockState = mapping2.get(pnxBlockState);
+    public com.sk89q.worldedit.world.block.BlockState getFAWEBlock(cn.nukkit.block.BlockState nkxBlockState) {
+        final com.sk89q.worldedit.world.block.BlockState faweBlockState = mapping2.get(nkxBlockState);
         if (faweBlockState == null) {
             return com.sk89q.worldedit.world.block.BlockState.get("minecraft:air");
         } else {

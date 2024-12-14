@@ -55,6 +55,10 @@ dependencies {
         isChanging = true
     }
 
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
+
     // 日志
     localImplementation(libs.log4jApi)
     localImplementation(libs.log4jBom) {

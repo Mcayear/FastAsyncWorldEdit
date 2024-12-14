@@ -19,8 +19,17 @@
 
 package com.sk89q.worldedit.bukkit;
 
+import cn.nukkit.Server;
+import cn.nukkit.block.Block;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.item.Item;
+import cn.nukkit.level.Level;
+import cn.nukkit.level.ParticleEffect;
+import cn.nukkit.level.Position;
+import cn.nukkit.level.particle.PunchBlockParticle;
+import cn.nukkit.math.BlockFace;
+import cn.nukkit.potion.Effect;
 import com.fastasyncworldedit.bukkit.util.WorldUnloadedException;
-import com.fastasyncworldedit.core.Fawe;
 import com.fastasyncworldedit.core.FaweCache;
 import com.fastasyncworldedit.core.configuration.Settings;
 import com.fastasyncworldedit.core.internal.exception.FaweException;
@@ -56,29 +65,18 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.weather.WeatherType;
 import com.sk89q.worldedit.world.weather.WeatherTypes;
-//import io.papermc.lib.PaperLib;
 import org.apache.logging.log4j.Logger;
-import cn.nukkit.Server;
-import cn.nukkit.potion.Effect;
-import org.bukkit.TreeType;
-import cn.nukkit.level.Level;
-import cn.nukkit.block.Block;
-import org.bukkit.block.BlockState;
-import cn.nukkit.block.BlockChest;
-import cn.nukkit.entity.Entity;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
+//import org.bukkit.TreeType;
 
 import java.lang.ref.WeakReference;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -135,21 +133,30 @@ public class BukkitWorld extends AbstractWorld {
     public List<com.sk89q.worldedit.entity.Entity> getEntities(Region region) {
         Level world = getWorld();
 
-        List<Entity> ents = TaskManager.taskManager().sync(world::getEntities);
+        cn.nukkit.entity.Entity[] ents = world.getEntities();
         List<com.sk89q.worldedit.entity.Entity> entities = new ArrayList<>();
-        for (Entity ent : ents) {
+        for (cn.nukkit.entity.Entity ent : ents) {
             if (region.contains(BukkitAdapter.asBlockVector(ent.getLocation()))) {
-                entities.add(BukkitAdapter.adapt(ent));
+                entities.add(new BukkitEntity(ent));
             }
         }
         return entities;
+    }
+    /**
+     * Get the world handle.
+     *
+     * @return the world
+     */
+    public Level getLevel() {
+        return checkNotNull(worldRef.get(), "The world was unloaded and the reference is unavailable");
     }
 
     @Override
     public List<com.sk89q.worldedit.entity.Entity> getEntities() {
         List<com.sk89q.worldedit.entity.Entity> list = new ArrayList<>();
 
-        List<Entity> ents = TaskManager.taskManager().sync(getWorld()::getEntities);
+        Level world = getLevel();
+        cn.nukkit.entity.Entity[] ents = world.getEntities();
         for (Entity entity : ents) {
             list.add(BukkitAdapter.adapt(entity));
         }
@@ -186,7 +193,7 @@ public class BukkitWorld extends AbstractWorld {
     protected Level getWorldChecked() throws WorldEditException {
         Level tmp = worldRef.get();
         if (tmp == null) {
-            tmp = Bukkit.getWorld(worldNameRef);
+            tmp = Server.getInstance().getLevelByName(worldNameRef);
             if (tmp != null) {
                 worldRef = new WeakReference<>(tmp);
             }
@@ -292,45 +299,45 @@ public class BukkitWorld extends AbstractWorld {
         return true;
     }
 
-    /**
-     * An EnumMap that stores which WorldEdit TreeTypes apply to which Bukkit TreeTypes.
-     */
-    private static final EnumMap<TreeGenerator.TreeType, TreeType> treeTypeMapping =
-            new EnumMap<>(TreeGenerator.TreeType.class);
-
-    static {
-        for (TreeGenerator.TreeType type : TreeGenerator.TreeType.values()) {
-            try {
-                TreeType bukkitType = TreeType.valueOf(type.name());
-                treeTypeMapping.put(type, bukkitType);
-            } catch (IllegalArgumentException e) {
-                // Unhandled TreeType
-            }
-        }
-        // Other mappings for WE-specific values
-        treeTypeMapping.put(TreeGenerator.TreeType.SHORT_JUNGLE, TreeType.SMALL_JUNGLE);
-        treeTypeMapping.put(TreeGenerator.TreeType.RANDOM, TreeType.BROWN_MUSHROOM);
-        treeTypeMapping.put(TreeGenerator.TreeType.RANDOM_REDWOOD, TreeType.REDWOOD);
-        treeTypeMapping.put(TreeGenerator.TreeType.PINE, TreeType.REDWOOD);
-        treeTypeMapping.put(TreeGenerator.TreeType.RANDOM_BIRCH, TreeType.BIRCH);
-        treeTypeMapping.put(TreeGenerator.TreeType.RANDOM_JUNGLE, TreeType.JUNGLE);
-        treeTypeMapping.put(TreeGenerator.TreeType.RANDOM_MUSHROOM, TreeType.BROWN_MUSHROOM);
-        for (TreeGenerator.TreeType type : TreeGenerator.TreeType.values()) {
-            if (treeTypeMapping.get(type) == null) {
-                //FAWE start
-                LOGGER.info("No TreeType mapping for TreeGenerator.TreeType." + type);
-                LOGGER.info("The above message is displayed because your FAWE version is newer than {}" +
-                        " and contains features of future minecraft versions which do not exist in {} hence the tree type" +
-                        " {} is not available. This is not an error. This version of FAWE will work on your version of " +
-                        " Minecraft. This is an informative message only.", Bukkit.getVersion(), Bukkit.getVersion(), type);
-                //FAWE end
-            }
-        }
-    }
-
-    public static TreeType toBukkitTreeType(TreeGenerator.TreeType type) {
-        return treeTypeMapping.get(type);
-    }
+//    /**
+//     * An EnumMap that stores which WorldEdit TreeTypes apply to which Bukkit TreeTypes.
+//     */
+//    private static final EnumMap<TreeGenerator.TreeType, TreeType> treeTypeMapping =
+//            new EnumMap<>(TreeGenerator.TreeType.class);
+//
+//    static {
+//        for (TreeGenerator.TreeType type : TreeGenerator.TreeType.values()) {
+//            try {
+//                TreeType bukkitType = TreeType.valueOf(type.name());
+//                treeTypeMapping.put(type, bukkitType);
+//            } catch (IllegalArgumentException e) {
+//                // Unhandled TreeType
+//            }
+//        }
+//        // Other mappings for WE-specific values
+//        treeTypeMapping.put(TreeGenerator.TreeType.SHORT_JUNGLE, TreeType.SMALL_JUNGLE);
+//        treeTypeMapping.put(TreeGenerator.TreeType.RANDOM, TreeType.BROWN_MUSHROOM);
+//        treeTypeMapping.put(TreeGenerator.TreeType.RANDOM_REDWOOD, TreeType.REDWOOD);
+//        treeTypeMapping.put(TreeGenerator.TreeType.PINE, TreeType.REDWOOD);
+//        treeTypeMapping.put(TreeGenerator.TreeType.RANDOM_BIRCH, TreeType.BIRCH);
+//        treeTypeMapping.put(TreeGenerator.TreeType.RANDOM_JUNGLE, TreeType.JUNGLE);
+//        treeTypeMapping.put(TreeGenerator.TreeType.RANDOM_MUSHROOM, TreeType.BROWN_MUSHROOM);
+//        for (TreeGenerator.TreeType type : TreeGenerator.TreeType.values()) {
+//            if (treeTypeMapping.get(type) == null) {
+//                //FAWE start
+//                LOGGER.info("No TreeType mapping for TreeGenerator.TreeType." + type);
+//                LOGGER.info("The above message is displayed because your FAWE version is newer than {}" +
+//                        " and contains features of future minecraft versions which do not exist in {} hence the tree type" +
+//                        " {} is not available. This is not an error. This version of FAWE will work on your version of " +
+//                        " Minecraft. This is an informative message only.", Bukkit.getVersion(), Bukkit.getVersion(), type);
+//                //FAWE end
+//            }
+//        }
+//    }
+//
+//    public static TreeType toBukkitTreeType(TreeGenerator.TreeType type) {
+//        return treeTypeMapping.get(type);
+//    }
 
     @Override
     public boolean generateTree(TreeGenerator.TreeType type, EditSession editSession, BlockVector3 pt) {
@@ -343,7 +350,7 @@ public class BukkitWorld extends AbstractWorld {
     @Override
     public void dropItem(Vector3 pt, BaseItemStack item) {
         Level world = getWorld();
-        world.dropItemNaturally(BukkitAdapter.adapt(world, pt), BukkitAdapter.adapt(item));
+        world.dropItem(BukkitAdapter.adapt(world, pt), BukkitAdapter.adapt(item));
     }
 
     @Override
@@ -400,7 +407,8 @@ public class BukkitWorld extends AbstractWorld {
     public void fixAfterFastMode(Iterable<BlockVector2> chunks) {
         Level world = getWorld();
         for (BlockVector2 chunkPos : chunks) {
-            world.refreshChunk(chunkPos.x(), chunkPos.z());
+            world.unloadChunk(chunkPos.x(), chunkPos.z());
+            world.loadChunk(chunkPos.x(), chunkPos.z());
         }
     }
 
@@ -413,7 +421,7 @@ public class BukkitWorld extends AbstractWorld {
             return false;
         }
 
-        world.playEffect(BukkitAdapter.adapt(world, position), effect, data);
+        world.addParticleEffect(BukkitAdapter.adapt(world, position), ParticleEffect.valueOf(effect.getName()), data);
 
         return true;
     }
@@ -422,7 +430,11 @@ public class BukkitWorld extends AbstractWorld {
     @Override
     public boolean playBlockBreakEffect(Vector3 position, BlockType type) {
         Level world = getWorld();
-        world.playEffect(BukkitAdapter.adapt(world, position), Effect.STEP_SOUND, BukkitAdapter.adapt(type));
+        world.addParticle(new PunchBlockParticle(
+                new cn.nukkit.math.Vector3(position.x(), position.y(), position.z()),
+                Block.fromFullId(BukkitAdapter.adapt(type).getFullId()),
+                BlockFace.UP
+        ));
         return true;
     }
     //FAWE end
@@ -431,7 +443,7 @@ public class BukkitWorld extends AbstractWorld {
     public WeatherType getWeather() {
         if (getWorld().isThundering()) {
             return WeatherTypes.THUNDER_STORM;
-        } else if (getWorld().hasStorm()) {
+        } else if (getWorld().isRaining()) {
             return WeatherTypes.RAIN;
         }
 
@@ -440,7 +452,12 @@ public class BukkitWorld extends AbstractWorld {
 
     @Override
     public long getRemainingWeatherDuration() {
-        return getWorld().getWeatherDuration();
+        if (getWorld().isThundering()) {
+            return getWorld().getThunderTime();
+        } else if (getWorld().isRaining()) {
+            return getWorld().getRainTime();
+        }
+        return 0;
     }
 
     @Override
@@ -448,9 +465,9 @@ public class BukkitWorld extends AbstractWorld {
         if (weatherType == WeatherTypes.THUNDER_STORM) {
             getWorld().setThundering(true);
         } else if (weatherType == WeatherTypes.RAIN) {
-            getWorld().setStorm(true);
+            getWorld().setRaining(true);
         } else {
-            getWorld().setStorm(false);
+            getWorld().setRaining(false);
             getWorld().setThundering(false);
         }
     }
@@ -460,21 +477,20 @@ public class BukkitWorld extends AbstractWorld {
         // Who named these methods...
         if (weatherType == WeatherTypes.THUNDER_STORM) {
             getWorld().setThundering(true);
-            getWorld().setThunderDuration((int) duration);
-            getWorld().setWeatherDuration((int) duration);
+            getWorld().setThunderTime((int) duration);
         } else if (weatherType == WeatherTypes.RAIN) {
-            getWorld().setStorm(true);
-            getWorld().setWeatherDuration((int) duration);
+            getWorld().setRaining(true);
+            getWorld().setRainTime((int) duration);
         } else {
-            getWorld().setStorm(false);
+            getWorld().setRaining(false);
             getWorld().setThundering(false);
-            getWorld().setWeatherDuration((int) duration);
+            getWorld().setRainTime((int) duration);
         }
     }
 
     @Override
     public BlockVector3 getSpawnPosition() {
-        return BukkitAdapter.asBlockVector(getWorld().getSpawnLocation());
+        return BukkitAdapter.asBlockVector(getWorld().getSpawnLocation().getLocation());
     }
 
     @Override
@@ -482,13 +498,14 @@ public class BukkitWorld extends AbstractWorld {
         //FAWE start - safe edit region
         testCoords(pt);
         //FAWE end
-        getWorld().getBlockAt(pt.x(), pt.y(), pt.z()).breakNaturally();
+        getWorld().useBreakOn(new cn.nukkit.math.Vector3(pt.x(), pt.y(), pt.z()));
     }
 
     //FAWE start
     @Override
     public Collection<BaseItemStack> getBlockDrops(BlockVector3 position) {
-        return getWorld().getBlockAt(position.x(), position.y(), position.z()).getDrops().stream()
+        return Arrays
+                .stream(getWorld().getBlock(position.x(), position.y(), position.z()).getDrops(Item.AIR_ITEM))
                 .map(BukkitAdapter::adapt).collect(Collectors.toList());
     }
     //FAWE end
@@ -525,7 +542,7 @@ public class BukkitWorld extends AbstractWorld {
             }
         }
         if (WorldEditPlugin.getInstance().getLocalConfiguration().unsupportedVersionEditing) {
-            Block bukkitBlock = getWorld().getBlockAt(position.x(), position.y(), position.z());
+            Block bukkitBlock = getWorld().getBlock(position.x(), position.y(), position.z());
             return BukkitAdapter.adapt(bukkitBlock.getBlockData());
         } else {
             throw new RuntimeException(new UnsupportedVersionEditException());
@@ -549,7 +566,7 @@ public class BukkitWorld extends AbstractWorld {
                 }
             }
         }
-        Block bukkitBlock = getWorld().getBlockAt(position.x(), position.y(), position.z());
+        Block bukkitBlock = getWorld().getBlock(position.x(), position.y(), position.z());
         bukkitBlock.setBlockData(BukkitAdapter.adapt(block), sideEffects.doesApplyAny());
         return true;
     }
@@ -675,7 +692,7 @@ public class BukkitWorld extends AbstractWorld {
 
     @Override
     public void sendFakeChunk(Player player, ChunkPacket packet) {
-        org.bukkit.entity.Player bukkitPlayer = BukkitAdapter.adapt(player);
+        cn.nukkit.Player bukkitPlayer = BukkitAdapter.adapt(player);
         WorldEditPlugin.getInstance().getBukkitImplAdapter().sendFakeChunk(getWorld(), bukkitPlayer, packet);
     }
 

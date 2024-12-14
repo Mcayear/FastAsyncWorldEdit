@@ -2,6 +2,7 @@ package com.fastasyncworldedit.bukkit.adapter;
 
 import com.fastasyncworldedit.bukkit.util.BukkitItemStack;
 import com.fastasyncworldedit.core.util.TaskManager;
+import com.sk89q.bukkit.util.mappings.MappingRegistries;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.NotABlockException;
 import com.sk89q.worldedit.blocks.BaseItemStack;
@@ -9,7 +10,6 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.BukkitEntity;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.bukkit.EditSessionBlockChangeDelegate;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -32,13 +32,14 @@ import com.sk89q.worldedit.world.item.ItemTypes;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 //import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
-import org.bukkit.TreeType;
+//import org.bukkit.NamespacedKey;
+//import org.bukkit.Registry;
+//import org.bukkit.TreeType;
 import cn.nukkit.level.biome.Biome;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -169,7 +170,7 @@ public interface IBukkitAdapter {
         if (!itemType.id().startsWith("minecraft:")) {
             throw new IllegalArgumentException("Bukkit only supports Minecraft items");
         }
-        return Material.getMaterial(itemType.id().substring(10).toUpperCase(Locale.ROOT));
+        return MappingRegistries.ITEM.getMapping().inverse().get(itemType).getItem();
     }
 
     /**
@@ -178,7 +179,7 @@ public interface IBukkitAdapter {
      * @param blockType The WorldEdit BlockType
      * @return The Bukkit Material
      */
-    default Material adapt(BlockType blockType) {
+    default cn.nukkit.level.generator.block.state.BlockState adapt(BlockType blockType) {
         checkNotNull(blockType);
         if (!blockType.id().startsWith("minecraft:")) {
             throw new IllegalArgumentException("Bukkit only supports Minecraft blocks");
@@ -187,7 +188,7 @@ public interface IBukkitAdapter {
         return Material.getMaterial(id);
     }
 
-    default org.bukkit.entity.EntityType adapt(EntityType entityType) {
+    default org.bukkit.entity.EntityType adaptEntity(EntityType entityType) {
         NamespacedKey entityKey = NamespacedKey.fromString(entityType.toString());
         if (entityKey == null) {
             throw new IllegalArgumentException("Entity key '" + entityType + "' does not map to Bukkit");
@@ -299,7 +300,7 @@ public interface IBukkitAdapter {
             throw new IllegalArgumentException("Bukkit only supports vanilla biomes");
         }
         try {
-            return Biome.valueOf(biomeType.id().substring(10).toUpperCase(Locale.ROOT));
+            return Biome.getBiome(biomeType.id().substring(10).toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             return null;
         }
@@ -337,7 +338,7 @@ public interface IBukkitAdapter {
      * @param entityType Bukkit EntityType
      * @return WorldEdit EntityType
      */
-    default EntityType adapt(org.bukkit.entity.EntityType entityType) {
+    default EntityType adaptEntity(org.bukkit.entity.EntityType entityType) {
         return EntityTypes.get(entityType.getKey().toString());
     }
 
@@ -366,25 +367,26 @@ public interface IBukkitAdapter {
      * @return If successsful
      */
     default boolean generateTree(TreeGenerator.TreeType type, EditSession editSession, BlockVector3 pt, cn.nukkit.level.Level world) {
-        TreeType bukkitType = BukkitWorld.toBukkitTreeType(type);
-        if (bukkitType == TreeType.CHORUS_PLANT) {
-            pt = pt.add(0, 1, 0); // bukkit skips the feature gen which does this offset normally, so we have to add it back
-        }
-        return type != null && world.generateTree(
-                BukkitAdapter.adapt(world, pt), bukkitType,
-                new EditSessionBlockChangeDelegate(editSession)
-        );
+//        TreeType bukkitType = BukkitWorld.toBukkitTreeType(type);
+//        if (bukkitType == TreeType.CHORUS_PLANT) {
+//            pt = pt.add(0, 1, 0); // bukkit skips the feature gen which does this offset normally, so we have to add it back
+//        }
+//        return type != null && world.generateTree(
+//                BukkitAdapter.adapt(world, pt), bukkitType,
+//                new EditSessionBlockChangeDelegate(editSession)
+//        );
+        return false;
     }
 
     /**
-     * Retrieve the list of Bukkit entities ({@link org.bukkit.entity.Entity}) in the given world. If overridden by adapters
+     * Retrieve the list of Bukkit entities ({@link cn.nukkit.entity.Entity}) in the given world. If overridden by adapters
      * will attempt retrieval asynchronously.
      *
      * @param world world to retrieve entities in
-     * @return list of {@link org.bukkit.entity.Entity}
+     * @return list of {@link cn.nukkit.entity.Entity}
      */
-    default List<org.bukkit.entity.Entity> getEntities(cn.nukkit.level.Level world) {
-        return TaskManager.taskManager().sync(world::getEntities);
+    default List<cn.nukkit.entity.Entity> getEntities(cn.nukkit.level.Level world) {
+        return Arrays.stream(world.getEntities()).toList();
     }
 
 }

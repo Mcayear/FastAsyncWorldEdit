@@ -4,14 +4,15 @@ import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.biome.EnumBiome;
-import cn.nukkit.level.format.IChunk;
+import cn.nukkit.level.format.Chunk;
 import com.fastasyncworldedit.bukkit.util.ItemUtil;
 import com.fastasyncworldedit.core.extent.processor.heightmap.HeightMapType;
+import com.fastasyncworldedit.core.nbt.FaweCompoundTag;
 import com.fastasyncworldedit.core.queue.IBlocks;
 import com.fastasyncworldedit.core.queue.IChunkGet;
 import com.fastasyncworldedit.core.queue.IChunkSet;
+import com.fastasyncworldedit.core.util.NbtUtils;
 import com.google.common.base.Preconditions;
-import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.internal.util.LogManagerCompat;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.biome.BiomeType;
@@ -19,10 +20,12 @@ import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockTypesCache;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,16 +35,16 @@ public class NukkitGetBlocks_Copy implements IChunkGet {
 
     private static final Logger LOGGER = LogManagerCompat.getLogger();
 
-    private final Map<BlockVector3, CompoundTag> tiles = new HashMap<>();
-    private final Set<CompoundTag> entities = new HashSet<>();
+    private final Map<BlockVector3, FaweCompoundTag> tiles = new HashMap<>();
+    private final Set<FaweCompoundTag> entities = new HashSet<>();
     private final char[][] blocks;
     private final int minHeight;
     private final int maxHeight;
     final Level serverLevel;
-    final IChunk levelChunk;
+    final Chunk levelChunk;
     private byte[][] biomes;
 
-    protected NukkitGetBlocks_Copy(Level serverLevel, IChunk levelChunk) {
+    protected NukkitGetBlocks_Copy(Level serverLevel, Chunk levelChunk) {
         this.levelChunk = levelChunk;
         this.serverLevel = serverLevel;
         this.minHeight = serverLevel.getMinBlockY() + 1;
@@ -57,35 +60,41 @@ public class NukkitGetBlocks_Copy implements IChunkGet {
                         blockEntity.getFloorY(),
                         blockEntity.getFloorZ()
                 ),
-                ItemUtil.toJNBT(blockEntity.namedTag)
+                ItemUtil.toFaweNBT(blockEntity.namedTag)
         );
     }
 
     @Override
-    public Map<BlockVector3, CompoundTag> getTiles() {
+    public Map<BlockVector3, FaweCompoundTag> tiles() {
         return tiles;
     }
 
+    @org.jetbrains.annotations.Nullable
     @Override
-    @Nullable
-    public CompoundTag getTile(int x, int y, int z) {
+    public FaweCompoundTag tile(final int x, final int y, final int z) {
         return tiles.get(BlockVector3.at(x, y, z));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void storeEntity(Entity entity) {
-        entities.add(ItemUtil.toJNBT(entity.namedTag));
+        entities.add(ItemUtil.toFaweNBT(entity.namedTag));
     }
 
     @Override
-    public Set<CompoundTag> getEntities() {
+    public Collection<FaweCompoundTag> entities() {
         return this.entities;
     }
 
+    /**
+     * {@return the compound tag describing the entity with the given UUID, if any}
+     *
+     * @param uuid the uuid of the entity
+     */
+    @Nullable
     @Override
-    public CompoundTag getEntity(UUID uuid) {
-        for (CompoundTag tag : entities) {
-            if (uuid.equals(tag.getUUID())) {
+    public FaweCompoundTag entity(final UUID uuid) {
+        for (FaweCompoundTag tag : entities) {
+            if (uuid.equals(NbtUtils.uuid(tag))) {
                 return tag;
             }
         }

@@ -1,5 +1,7 @@
 package com.fastasyncworldedit.bukkit.util;
 
+import com.fastasyncworldedit.core.nbt.FaweCompoundTag;
+import com.google.common.collect.Maps;
 import com.sk89q.jnbt.*;
 import cn.nukkit.nbt.tag.Tag;
 
@@ -32,6 +34,18 @@ public class ItemUtil {
         cn.nukkit.nbt.tag.CompoundTag nukkitTag = ItemUtil.toNukkit(tag);
         item.setNamedTag(nukkitTag);
         return item;
+    }
+
+    public static FaweCompoundTag toFaweNBT(cn.nukkit.nbt.tag.CompoundTag nukkitTag) {
+        Map<String, com.sk89q.jnbt.Tag<?, ?>> value = toJNBT(nukkitTag).getValue();
+        LinCompoundTag linCompoundTag = LinCompoundTag.of(Maps.transformValues(value, com.sk89q.jnbt.Tag::toLinTag));
+        return FaweCompoundTag.of(linCompoundTag);
+    }
+
+    public static FaweCompoundTag toFaweNBT(com.sk89q.jnbt.CompoundTag tag) {
+        Map<String, com.sk89q.jnbt.Tag<?, ?>> value = tag.getValue();
+        LinCompoundTag linCompoundTag = LinCompoundTag.of(Maps.transformValues(value, com.sk89q.jnbt.Tag::toLinTag));
+        return FaweCompoundTag.of(linCompoundTag);
     }
 
     public static com.sk89q.jnbt.CompoundTag toJNBT(cn.nukkit.nbt.tag.CompoundTag nukkitTag) {

@@ -49,7 +49,7 @@ public class ItemMappings {
         }
 
         public boolean equals(final HashItem obj) {
-            return this.item.getId().equals(obj.item.getId()) && this.item.getDamage() == obj.item.getDamage();
+            return this.item.getNamespaceId().equals(obj.item.getNamespaceId()) && this.item.getDamage() == obj.item.getDamage();
         }
 
         @Override

@@ -33,7 +33,7 @@ public final class ItemRegistryPopulator {
                     );
                     map2.forEach((k, v) -> {
                         var name = v.get("bedrock_identifier").toString();
-                        Item nkItem = Item.get(name);
+                        Item nkItem = Item.fromString(name);
                         if (v.containsKey("bedrock_data") && nkItem.hasMeta() && nkItem.getDamage() == 0) {
                             nkItem.setDamage(Double.valueOf(v.get("bedrock_data").toString()).intValue());
                         }

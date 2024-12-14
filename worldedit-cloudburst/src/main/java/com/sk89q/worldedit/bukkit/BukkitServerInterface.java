@@ -44,10 +44,9 @@ import com.sk89q.worldedit.world.DataFixer;
 import com.sk89q.worldedit.world.registry.Registries;
 //import io.papermc.lib.PaperLib;
 import org.apache.logging.log4j.Logger;
-import org.bukkit.Bukkit;
 import cn.nukkit.Server;
 import cn.nukkit.level.Level;
-import org.bukkit.entity.EntityType;
+import cn.nukkit.command.selector.args.impl.Type;
 import org.enginehub.piston.CommandManager;
 
 import javax.annotation.Nonnull;
@@ -102,7 +101,7 @@ public class BukkitServerInterface extends AbstractPlatform implements MultiUser
     @Override
     public int getDataVersion() {
         if (plugin.getLifecycledBukkitImplAdapter().isValid()) {
-            return Bukkit.getUnsafe().getDataVersion();
+//            return Bukkit.getUnsafe().getDataVersion();
         }
         return -1;
     }
@@ -120,8 +119,8 @@ public class BukkitServerInterface extends AbstractPlatform implements MultiUser
         if (!type.startsWith("minecraft:")) {
             return false;
         }
-        @SuppressWarnings("deprecation") final EntityType entityType = EntityType.fromName(type.substring(10));
-        return entityType != null && entityType.isAlive();
+
+        return Type.ENTITY_TYPE2ID.containsKey(type);
     }
 
     @Override
@@ -131,7 +130,11 @@ public class BukkitServerInterface extends AbstractPlatform implements MultiUser
 
     @Override
     public int schedule(long delay, long period, Runnable task) {
-        return Server.getInstance().getScheduler().scheduleDelayedRepeatingTask(plugin, task, delay, period);
+        return Server
+                .getInstance()
+                .getScheduler()
+                .scheduleDelayedRepeatingTask(plugin, task, (int) delay, (int) period)
+                .getTaskId();
     }
 
     @Override
@@ -157,7 +160,7 @@ public class BukkitServerInterface extends AbstractPlatform implements MultiUser
         if (player instanceof BukkitPlayer) {
             return player;
         } else {
-            org.bukkit.entity.Player bukkitPlayer = server.getPlayerExact(player.getName());
+            cn.nukkit.Player bukkitPlayer = server.getPlayerExact(player.getName());
             return bukkitPlayer != null ? WorldEditPlugin.getInstance().wrapPlayer(bukkitPlayer) : null;
         }
     }
@@ -168,8 +171,8 @@ public class BukkitServerInterface extends AbstractPlatform implements MultiUser
         if (world instanceof BukkitWorld) {
             return (BukkitWorld) world;
         } else {
-            World bukkitWorld = server.getWorld(world.getName());
-            return bukkitWorld != null ? new BukkitWorld(bukkitWorld) : null;
+            cn.nukkit.level.Level level = server.getLevelByName(world.getName());
+            return level != null ? new BukkitWorld(level) : null;
         }
     }
 
