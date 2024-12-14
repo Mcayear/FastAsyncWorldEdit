@@ -332,6 +332,18 @@ public enum BukkitAdapter {
     }
 
     /**
+     * Create a WorldEdit entity from a Bukkit entity.
+     *
+     * @param entity the Bukkit entity
+     * @return a WorldEdit entity
+     */
+    public static Entity adapt(cn.nukkit.blockentity.BlockEntity entity) {
+        //FAWE start - logic moved to IBukkitAdapter
+        return getAdapter().adapt(entity);
+        //FAWE end
+    }
+
+    /**
      * Create a Bukkit Material form a WorldEdit ItemType.
      *
      * @param itemType The WorldEdit ItemType
@@ -402,7 +414,7 @@ public enum BukkitAdapter {
 //        //FAWE end
 //    }
 
-    public static org.bukkit.entity.EntityType adaptEntity(EntityType entityType) {
+    public static String adaptEntity(EntityType entityType) {
         //FAWE start - logic moved to IBukkitAdapter
         return getAdapter().adaptEntity(entityType);
         //FAWE end

@@ -19,6 +19,8 @@
 
 package com.sk89q.worldedit.bukkit;
 
+import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockID;
 import com.sk89q.worldedit.bukkit.adapter.BukkitImplAdapter;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
@@ -27,7 +29,7 @@ import com.sk89q.worldedit.entity.metadata.EntityProperties;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.NullWorld;
-import com.sk89q.worldedit.world.entity.EntityType;
+//import com.sk89q.worldedit.world.entity.EntityType;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
@@ -42,8 +44,9 @@ public class BukkitEntity implements Entity {
 //FAWE end
 
     private final WeakReference<cn.nukkit.entity.Entity> entityRef;
+    private final WeakReference<cn.nukkit.blockentity.BlockEntity> blockEntityRef;
     //FAWE start
-    private final EntityType type;
+//    private final EntityType type;
     //FAWE end
 
     /**
@@ -54,16 +57,34 @@ public class BukkitEntity implements Entity {
     public BukkitEntity(cn.nukkit.entity.Entity entity) {
         checkNotNull(entity);
         //FAWE start
-        this.type = EntityType.REGISTRY.get(entity.getIdentifier().toString());
+//        this.type = EntityType.REGISTRY.get(entity.getIdentifier().toString());
         //FAWE end
         this.entityRef = new WeakReference<>(entity);
+        this.blockEntityRef = new WeakReference<>(null);
+    }
+
+    /**
+     * Create a new instance.
+     *
+     * @param entity the entity
+     */
+    public BukkitEntity(cn.nukkit.blockentity.BlockEntity entity) {
+        checkNotNull(entity);
+        //FAWE start
+//        this.type = EntityType.REGISTRY.get(entity.getIdentifier().toString());
+        //FAWE end
+        this.entityRef = new WeakReference<>(null);
+        this.blockEntityRef = new WeakReference<>(entity);
     }
 
     @Override
     public Extent getExtent() {
         cn.nukkit.entity.Entity entity = entityRef.get();
+        cn.nukkit.blockentity.BlockEntity blockEntity = blockEntityRef.get();
         if (entity != null) {
             return BukkitAdapter.adapt(entity.getLevel());
+        } else if (blockEntity != null) {
+            return BukkitAdapter.adapt(blockEntity.getLevel());
         } else {
             return NullWorld.getInstance();
         }
@@ -72,8 +93,11 @@ public class BukkitEntity implements Entity {
     @Override
     public Location getLocation() {
         cn.nukkit.entity.Entity entity = entityRef.get();
+        cn.nukkit.blockentity.BlockEntity blockEntity = blockEntityRef.get();
         if (entity != null) {
             return BukkitAdapter.adapt(entity.getLocation());
+        } else if (blockEntity != null) {
+            return BukkitAdapter.adapt(blockEntity.getLocation());
         } else {
             return new Location(NullWorld.getInstance());
         }
@@ -82,8 +106,11 @@ public class BukkitEntity implements Entity {
     @Override
     public boolean setLocation(Location location) {
         cn.nukkit.entity.Entity entity = entityRef.get();
+        cn.nukkit.blockentity.BlockEntity blockEntity = blockEntityRef.get();
         if (entity != null) {
             return entity.teleport(BukkitAdapter.adapt(location));
+        } else if (blockEntity != null) {
+            return blockEntity.getLevelBlock().cloneTo(BukkitAdapter.adapt(location));
         } else {
             return false;
         }
@@ -92,6 +119,7 @@ public class BukkitEntity implements Entity {
     @Override
     public BaseEntity getState() {
         cn.nukkit.entity.Entity entity = entityRef.get();
+        cn.nukkit.blockentity.BlockEntity blockEntity = blockEntityRef.get();
         if (entity != null) {
             if (entity instanceof Player) {
                 return null;
@@ -103,6 +131,8 @@ public class BukkitEntity implements Entity {
             } else {
                 return null;
             }
+        } else if (blockEntity != null) {
+            return null;
         } else {
             return null;
         }
@@ -111,6 +141,7 @@ public class BukkitEntity implements Entity {
     @Override
     public boolean remove() {
         cn.nukkit.entity.Entity entity = entityRef.get();
+        cn.nukkit.blockentity.BlockEntity blockEntity = blockEntityRef.get();
         if (entity != null) {
             try {
                 entity.close();
@@ -118,6 +149,16 @@ public class BukkitEntity implements Entity {
                 return false;
             }
             return entity.isClosed();
+        } else if (blockEntity != null) {
+            var level = blockEntity.getLevel();
+            var pos = blockEntity.getLocation();
+            try {
+                level.setBlock(pos, 0, Block.get(Block.AIR), false, false);
+                blockEntity.close();
+            } catch (UnsupportedOperationException e) {
+                return false;
+            }
+            return blockEntity.closed && level.getBlock(pos).getId() == BlockID.AIR;
         } else {
             return true;
         }
@@ -128,8 +169,11 @@ public class BukkitEntity implements Entity {
     @Override
     public <T> T getFacet(Class<? extends T> cls) {
         cn.nukkit.entity.Entity entity = entityRef.get();
+        cn.nukkit.blockentity.BlockEntity blockEntity = blockEntityRef.get();
         if (entity != null && EntityProperties.class.isAssignableFrom(cls)) {
             return (T) new BukkitEntityProperties(entity);
+        } else if (blockEntity != null && EntityProperties.class.isAssignableFrom(cls)) {
+            return (T) new BukkitEntityProperties(blockEntity);
         } else {
             return null;
         }

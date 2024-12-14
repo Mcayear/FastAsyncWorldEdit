@@ -160,6 +160,17 @@ public interface IBukkitAdapter {
     }
 
     /**
+     * Create a WorldEdit entity from a Bukkit entity.
+     *
+     * @param entity the Bukkit entity
+     * @return a WorldEdit entity
+     */
+    default Entity adapt(cn.nukkit.blockentity.BlockEntity entity) {
+        checkNotNull(entity);
+        return new BukkitEntity(entity);
+    }
+
+    /**
      * Create a Bukkit Material form a WorldEdit ItemType
      *
      * @param itemType The WorldEdit ItemType
@@ -186,15 +197,6 @@ public interface IBukkitAdapter {
         }
         String id = blockType.id().substring(10).toUpperCase(Locale.ROOT);
         return Material.getMaterial(id);
-    }
-
-    default org.bukkit.entity.EntityType adaptEntity(EntityType entityType) {
-        NamespacedKey entityKey = NamespacedKey.fromString(entityType.toString());
-        if (entityKey == null) {
-            throw new IllegalArgumentException("Entity key '" + entityType + "' does not map to Bukkit");
-        }
-
-        return Registry.ENTITY_TYPE.get(entityKey);
     }
 
     /**
@@ -332,14 +334,18 @@ public interface IBukkitAdapter {
         return new BukkitWorld(world);
     }
 
+    default String adaptEntity(EntityType entityType) {
+        return entityType.id();
+    }
+
     /**
      * Create a WorldEdit EntityType from a Bukkit one.
      *
      * @param entityType Bukkit EntityType
      * @return WorldEdit EntityType
      */
-    default EntityType adaptEntity(org.bukkit.entity.EntityType entityType) {
-        return EntityTypes.get(entityType.getKey().toString());
+    default EntityType adaptEntity(String entityType) {
+        return EntityTypes.get(entityType);
     }
 
     /**
