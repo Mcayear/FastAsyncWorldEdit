@@ -356,11 +356,10 @@ public interface IBukkitAdapter {
      */
     default BlockState asBlockState(Item itemStack) {
         checkNotNull(itemStack);
-        if (itemStack.getType().isBlock()) {
-            return adapt(itemStack.getType().createBlockData());
-        } else {
-            throw new NotABlockException();
-        }
+//        if (itemStack.getBlock().isAir()) {
+//            throw new NotABlockException();
+//        }
+        return adapt(itemStack.getBlock());
     }
 
     /**

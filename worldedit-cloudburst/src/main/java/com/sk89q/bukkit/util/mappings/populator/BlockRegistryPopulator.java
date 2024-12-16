@@ -2,24 +2,25 @@ package com.sk89q.bukkit.util.mappings.populator;
 
 import cn.nukkit.block.BlockAir;
 import cn.nukkit.block.BlockFlowingLava;
-import cn.nukkit.block.property.CommonBlockProperties;
-import org.cloudburstmc.blockstateupdater.BlockStateUpdaterBase;
+import com.fastasyncworldedit.bukkit.adapter.BlockStateAdapter;
+import com.sk89q.bukkit.util.mappings.pnx.HashUtils;
+import com.sk89q.bukkit.util.mappings.pnx.block.property.CommonBlockProperties;
+import com.sk89q.bukkit.util.mappings.pnx.TreeMapCompoundTag;
+import org.cloudburstmc.blockstateupdater.BlockStateUpdater;
 import org.cloudburstmc.blockstateupdater.BlockStateUpdater_1_20_10;
 import org.cloudburstmc.blockstateupdater.BlockStateUpdater_1_20_30;
 import org.cloudburstmc.blockstateupdater.BlockStateUpdater_1_20_40;
 import org.cloudburstmc.blockstateupdater.BlockStateUpdater_1_20_50;
 import org.cloudburstmc.blockstateupdater.BlockStateUpdater_1_20_60;
 import org.cloudburstmc.blockstateupdater.BlockStateUpdater_1_20_70;
-import cn.nukkit.level.updater.util.tagupdater.CompoundTagUpdaterContext;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.nbt.tag.TreeMapCompoundTag;
 import cn.nukkit.registry.Registries;
-import cn.nukkit.utils.HashUtils;
 import com.sk89q.bukkit.util.mappings.MappingRegistries;
 import com.sk89q.bukkit.util.mappings.type.BlockMappings;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.world.block.BlockState;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.cloudburstmc.blockstateupdater.util.tagupdater.CompoundTagUpdaterContext;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,9 +39,9 @@ public final class BlockRegistryPopulator {
 
         CompoundTag remap(CompoundTag tag);
 
-        static Remapper of(Updater... updaters) {
+        static Remapper of(BlockStateUpdater... updaters) {
             CompoundTagUpdaterContext context = new CompoundTagUpdaterContext();
-            for (Updater updater : updaters) {
+            for (BlockStateUpdater updater : updaters) {
                 updater.registerUpdaters(context);
             }
 
@@ -72,7 +73,7 @@ public final class BlockRegistryPopulator {
                     new InputStreamReader(stream),
                     Map.class
             );
-            Object2ObjectOpenHashMap<cn.nukkit.block.BlockState, BlockState> PNX2FAWE = new Object2ObjectOpenHashMap<>();
+            Object2ObjectOpenHashMap<BlockStateAdapter, BlockState> PNX2FAWE = new Object2ObjectOpenHashMap<>();
             blocks.forEach((k, v) -> {
                 final TreeMapCompoundTag treeMapCompoundTag = new TreeMapCompoundTag();
                 var name = v.get("bedrock_identifier").toString();
@@ -96,7 +97,7 @@ public final class BlockRegistryPopulator {
 
                 final CompoundTag remappedTag = mapper.remap(treeMapCompoundTag);
                 final int i = HashUtils.fnv1a_32_nbt(remappedTag);
-                cn.nukkit.block.BlockState nkxBlockState = Registries.BLOCKSTATE.get(i);
+                BlockStateAdapter nkxBlockState = Registries.BLOCKSTATE.get(i);
                 if (nkxBlockState == null && !experimentalBlocks.contains(remappedTag.getString("name"))) {
                     PNXWorldEditPlugin
                             .getInstance()
@@ -106,7 +107,7 @@ public final class BlockRegistryPopulator {
                 }
                 PNX2FAWE.put(nkxBlockState, BlockState.get(k));
             });
-            final cn.nukkit.block.BlockState i = BlockFlowingLava.PROPERTIES.getBlockState(CommonBlockProperties.LIQUID_DEPTH.createValue(
+            final BlockStateAdapter i = BlockFlowingLava.PROPERTIES.getBlockState(CommonBlockProperties.LIQUID_DEPTH.createValue(
                     0));
             PNX2FAWE.put(i, BlockState.get("minecraft:lava[level=0]"));
             PNX2FAWE.trim();
@@ -314,7 +315,7 @@ public final class BlockRegistryPopulator {
                     new InputStreamReader(stream),
                     Map.class
             );
-            Object2ObjectOpenHashMap<String, cn.nukkit.block.BlockState> FAWE2PNX = new Object2ObjectOpenHashMap<>();
+            Object2ObjectOpenHashMap<String, BlockStateAdapter> FAWE2PNX = new Object2ObjectOpenHashMap<>();
             blocks.forEach((k, v) -> {
                 final TreeMapCompoundTag treeMapCompoundTag = new TreeMapCompoundTag();
                 var name = v.get("bedrock_identifier").toString();
@@ -338,7 +339,7 @@ public final class BlockRegistryPopulator {
 
                 final CompoundTag remappedTag = mapper.remap(treeMapCompoundTag);
                 final int i = HashUtils.fnv1a_32_nbt(remappedTag);
-                cn.nukkit.block.BlockState nkxBlockState = Registries.BLOCKSTATE.get(i);
+                BlockStateAdapter nkxBlockState = Registries.BLOCKSTATE.get(i);
                 if (nkxBlockState == null && !experimentalBlocks.contains(remappedTag.getString("name"))) {
                     PNXWorldEditPlugin
                             .getInstance()
@@ -348,7 +349,7 @@ public final class BlockRegistryPopulator {
                 }
                 FAWE2PNX.put(k, nkxBlockState);
             });
-            final cn.nukkit.block.BlockState i = BlockFlowingLava.PROPERTIES.getBlockState(CommonBlockProperties.LIQUID_DEPTH.createValue(
+            final BlockStateAdapter i = BlockFlowingLava.PROPERTIES.getBlockState(CommonBlockProperties.LIQUID_DEPTH.createValue(
                     0));
             FAWE2PNX.put("minecraft:lava[level=0]", i);
             FAWE2PNX.trim();
